@@ -4,90 +4,100 @@ Bienvenido al sistema **CILP**. Este manual le guiará paso a paso para utilizar
 
 ---
 
-## 🏠 1. Pantalla Principal y Menú
+## 1. Pantalla Principal y Menú
 
-Al ingresar al sistema, verá un **Menú Lateral** a la izquierda. Este menú es su centro de comando.
+Al ingresar al sistema, verá un **Menú Lateral** a la izquierda con el título "Refinería CILP". Este menú es su centro de comando para navegar por todas las funciones.
 
-El menú está dividido en dos secciones principales:
+El menú está dividido en dos secciones:
 
-### 🛠️ Operaciones
+### Operaciones
 Aquí realizará las tareas diarias del sistema.
-*   **🏠 Inicio**: Pantalla de bienvenida.
-*   **⚖️ Gestión de Pesadas**: Para registrar el peso de entrada (Tara) y salida (Bruto) de los camiones.
-*   **🚚 Órdenes de Transporte**: Para crear y ver las órdenes de carga o descarga planificadas.
+*   **Inicio**: Pantalla de bienvenida con información general.
+*   **Gestión de Pesadas**: Pantalla utilizada por el balancero para registrar el peso de entrada (Tara) y salida (Bruto) de los camiones.
+*   **Órdenes de Transporte**: Pantalla para la logística, donde se crean y consultan las órdenes de carga o descarga planificadas.
 
-### 📋 Maestros (Configuración)
-Aquí se cargan los datos que usa el sistema (solo se hace una vez o cuando hay cambios).
-*   **🚚 Vehículos**: Camiones y acoplados.
-*   **👥 Conductores**: Choferes habilitados.
-*   **📦 Productos**: Lista de materiales (Crudo, Combustible, etc.).
-*   **🏢 Razones Sociales**: Clientes, Proveedores y Transportistas.
-*   **🖥️ Básculas**: Configuración de balanzas.
-*   **👤 Usuarios**: Personas con acceso al sistema.
+### Maestros
+Aquí se configuran los datos base del sistema.
+*   **Vehículos**: Gestión de camiones y acoplados habilitados.
+*   **Conductores**: Gestión de los choferes permitidos.
+*   **Productos**: Lista de materiales (ej. Crudo, Combustible).
+*   **Razones Sociales**: Base de datos de Clientes, Proveedores y empresas de Transporte.
+*   **Básculas**: Configuración técnica de las balanzas.
+*   **Usuarios**: Gestión de personas con acceso al sistema.
 
 ---
 
-## 🚀 2. Guía Rápida: Realizar una Operación Completa
+## 2. Guía Paso a Paso: Realizar una Operación Completa
 
-Para que un camión pueda entrar y pesarse, primero debe existir una **Orden de Transporte**. Siga estos pasos:
+Para que un camión pueda ingresar y pesarse en la planta, primero debe existir una **Orden de Transporte** válida. El flujo completo es:
 
-### Paso 1: Crear una Orden de Transporte
-Antes de que llegue el camión, planifique su visita.
+### Paso 1: Crear una Orden de Transporte (Logística)
+Esta tarea se realiza antes de que el camión llegue a la planta.
 
-1.  En el menú, haga clic en **Órdenes de Transporte**.
-2.  Busque y haga clic en el botón (generalmente azul) que dice **"Nueva Orden"** o **"Crear"**.
-3.  Se abrirá un formulario. Complete los datos obligatorios:
-    *   📅 **Fecha Planificada**: Día estimado de la operación.
-    *   ⚖️ **Cantidad (KG)**: Peso estimado a transportar (ej: 30000).
-    *   📦 **Producto**: Qué va a cargar/descargar.
-    *   🏢 **Cliente/Proveedor**: Quién envía o recibe la carga.
-    *   🚛 **Transportista**: Empresa de transporte.
-    *   🚚 **Vehículo**: Patente del camión.
-    *   👤 **Conductor**: Nombre del chofer.
+1.  En el menú lateral, haga clic en la opción **Órdenes de Transporte**.
+2.  Verá la lista de órdenes existentes. Haga clic en el botón azul **+ Nuevo** ubicado arriba a la derecha.
+3.  Se abrirá una ventana emergente con el título "Nueva Orden de Transporte". Complete los siguientes campos obligatorios:
+    *   **Fecha Planificada**: Seleccione la fecha en la que se espera al camión.
+    *   **Cantidad (KG)**: Ingrese el peso estimado en kilogramos (ej: 30000).
+    *   **Producto**: Seleccione el material a cargar/descargar de la lista desplegable.
+    *   **Cliente/Proveedor**: Seleccione la empresa dueña de la carga.
+    *   **Transportista**: Seleccione la empresa transportista.
+    *   **Vehículo**: Seleccione la patente del camión asignado.
+    *   **Conductor**: Seleccione el chofer asignado.
+4.  Revise los datos y haga clic en el botón azul **Guardar Orden** al pie del formulario.
+    > *La ventana se cerrará y verá la nueva orden en la lista principal.*
+
+---
+
+### Paso 2: Registrar el Pesaje (Balanza)
+Esta tarea la realiza el operador de báscula cuando el camión está físicamente en la balanza.
+
+1.  En el menú lateral, haga clic en la opción **Gestión de Pesadas**.
+2.  Verá el formulario "Registrar Pesada".
+3.  **Identificar el Camión**:
+    *   Haga clic en el desplegable **Orden de Transporte (Planificación)**.
+    *   Seleccione la orden correspondiente. El formato muestra: `OT #[Número] - [Producto] ([Patente]) - [Kilos]`.
+    *   *Nota: Si la lista está vacía o no encuentra la patente, contacte a Logística para verificar que la Orden de Transporte del Paso 1 fue creada.*
+4.  **Capturar el Peso**:
+    *   **Automático**: El campo **Lectura Báscula (kg)** mostrará el valor transmitido por la balanza digital.
+    *   **Manual**: Si la balanza no conecta, marque la casilla **Ingreso Manual**. Esto habilitará el campo de peso para que pueda escribirlo y le pedirá obligatoriamente un **Motivo** (ej: "Falla de conexión").
+5.  Verifique que el ID Báscula sea correcto (por defecto es 1).
+6.  Haga clic en el botón azul **Registrar Peso**.
+
+**Resultado de la operación:**
+*   Si es el **Primer Pesaje** (Entrada), el sistema guardará la **Tara** del camión.
+*   Si es el **Segundo Pesaje** (Salida), el sistema guardará el **Bruto**, calculará el Neto automáticamente y cerrará la orden.
+*   En la parte inferior aparecerá un recuadro verde con el mensaje:
+    > **✅ Pesada Registrada**
+    > ID Pesada: ...
+    > Tipo: Tara o Bruto
+    > Peso Registrado: ... kg
+
+---
+
+## 3. Gestión de Datos (Maestros)
+
+Para mantener el sistema actualizado, utilice la sección Maestros del menú. El procedimiento es estándar para todas las opciones (Vehículos, Conductores, etc.):
+
+**Ejemplo: Dar de alta un nuevo Conductor**
+1.  Haga clic en **Conductores** en el menú.
+2.  Haga clic en el botón azul **+ Nuevo**.
+3.  Complete el formulario con los datos personales (Nombre, Apellido, DNI, Licencia).
 4.  Haga clic en **Guardar**.
-    > ✅ *¡Listo! La orden ya está creada y el camión está habilitado para ingresar.*
+    *   *Para editar*: Use el botón del lápiz en la lista.
+    *   *Para borrar*: Use el botón de la papelera (solo posible si no tiene operaciones asociadas).
 
 ---
 
-### Paso 2: Registrar el Pesaje (Báscula)
-Cuando el camión llega a la balanza:
+## 4. Solución de Problemas Frecuentes
 
-1.  En el menú, haga clic en **Gestión de Pesadas**.
-2.  Verá el formulario de "Registrar Pesada".
-3.  **Seleccione la Orden**: Despliegue la lista "Orden de Transporte".
-    *   *Tip*: Busque por la **Patente** del camión o el número de Orden.
-    *   *Nota*: Si no ve la orden, asegúrese de haber realizado el Paso 1 correctamente.
-4.  **Verifique el Peso**:
-    *   El sistema intentará leer la báscula automáticamente.
-    *   Si es necesario, puede ingresar el peso manualmente marcando "Ingreso Manual" (deberá explicar el motivo).
-5.  Haga clic en el botón azul **Registrar Peso**.
+**P: El camión está en balanza pero no aparece en la lista de "Orden de Transporte".**
+> R: Esto suele ocurrir por dos razones:
+> 1. La Orden de Transporte no fue creada. Verifique con Logística (Paso 1).
+> 2. La Orden ya fue completada (ya tiene los dos pesajes realizados).
 
-> **¿Qué sucede ahora?**
-> *   Si es la **primera vez** que se pesa esa orden, el sistema guardará la **Tara** (peso vacío/inicial).
-> *   Si es la **segunda vez** (salida), el sistema guardará el **Bruto** (peso lleno/final) y cerrará la operación.
-> *   Verá un mensaje verde de confirmación: **✅ Pesada Registrada**.
+**P: Hubo un error al guardar la pesada.**
+> R: Aparecerá un mensaje rojo indicando el error. Verifique su conexión a internet. Si el error persiste, intente usar el modo "Ingreso Manual" o contacte a soporte informando el mensaje de error exacto.
 
----
-
-## 📝 3. Gestión de Datos (Maestros)
-
-Si necesita agregar un nuevo Chofer, Camión o Cliente, vaya a la sección **Maestros**. El proceso es similar en todos:
-
-**Ejemplo: Agregar un nuevo Conductor**
-1.  Clic en **Conductores** en el menú.
-2.  Clic en **Nuevo Conductor**.
-3.  Complete los datos (Nombre, Apellido, DNI, Licencia).
-4.  Clic en **Guardar**.
-
----
-
-## ❓ 4. Solución de Problemas Frecuentes
-
-**P: No encuentro la Orden de Transporte en la pantalla de Pesadas.**
-> R: Verifique que la orden esté creada para **hoy** o la fecha correcta. También revise que la orden no haya sido completada (ya pesada dos veces).
-
-**P: El peso de la báscula no aparece.**
-> R: Verifique que la báscula esté conectada y encendida. Si el problema persiste, marque "Ingreso Manual" e ingrese el peso que ve en el visor digital, luego avise a soporte técnico.
-
-**P: Me equivoqué al crear una Orden.**
-> R: Vaya a "Órdenes de Transporte", busque la orden incorrecta y haga clic en el botón de **Editar** (lápiz) o **Eliminar** (papelera) si está disponible y la orden no tiene pesajes aún.
+**P: ¿Cómo corrijo una Orden de Transporte mal cargada?**
+> R: Vaya a la pantalla **Órdenes de Transporte**, busque la línea correspondiente y haga clic en el ícono del **Lápiz** (Editar) para modificar los datos, o en la **Papelera** (Eliminar) para empezar de cero. *Nota: No podrá eliminar órdenes que ya tengan pesajes registrados.*
