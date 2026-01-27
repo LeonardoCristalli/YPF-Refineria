@@ -33,7 +33,7 @@ La elección de estas herramientas busca maximizar la transparencia, la trazabil
 *   **Justificación:** Se utiliza una metodología ágil (Kanban/Scrum). Estas herramientas permiten visualizar el estado real del proyecto (Pendiente > En Progreso > Testeo > Terminado).
     *   *Ejemplo:* Una tarjeta para "Crear ABM de Conductores" se mueve a "Terminado" solo cuando cumple con los criterios de aceptación, facilitando la decisión de cuándo liberar una nueva versión.
 
-### Comunicación: Discord / Slack / Teams
+### Comunicación: Discord / Whatsapp
 *   **Justificación:** Centralizan la comunicación del equipo, permitiendo canales específicos por temática (ej. #backend, #frontend, #errores). Esto agiliza la resolución de bloqueos y la toma de decisiones rápidas sin depender de hilos de correo interminables.
 
 ### Enfoque de Desarrollo: Prototipado Funcional Directo
