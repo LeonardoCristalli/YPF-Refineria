@@ -33,9 +33,6 @@ La elección de estas herramientas busca maximizar la transparencia, la trazabil
 *   **Justificación:** Se utiliza una metodología ágil (Kanban/Scrum). Estas herramientas permiten visualizar el estado real del proyecto (Pendiente > En Progreso > Testeo > Terminado).
     *   *Ejemplo:* Una tarjeta para "Crear ABM de Conductores" se mueve a "Terminado" solo cuando cumple con los criterios de aceptación, facilitando la decisión de cuándo liberar una nueva versión.
 
-### Comunicación: Discord / Whatsapp
-*   **Justificación:** Centralizan la comunicación del equipo, permitiendo canales específicos por temática (ej. #backend, #frontend, #errores). Esto agiliza la resolución de bloqueos y la toma de decisiones rápidas sin depender de hilos de correo interminables.
-
 ### Enfoque de Desarrollo: Prototipado Funcional Directo
 *   **Justificación:** Se ha optado por prescindir de herramientas de diseño estático (como Figma) para pasar directamente al **desarrollo del prototipo funcional**.
 *   **Beneficio:** Esta estrategia "Code-First" permite validar la lógica de negocio y la experiencia de usuario sobre el software real desde el primer momento, reduciendo drásticamente los tiempos de entrega y evitando la discrepancia entre el diseño estático y la implementación final.
