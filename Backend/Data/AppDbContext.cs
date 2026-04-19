@@ -12,8 +12,6 @@ namespace Backend.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
         public DbSet<UsuarioRol> UsuarioRoles { get; set; }
-        public DbSet<CasoDeUso> CasosDeUso { get; set; }
-        public DbSet<RolCasoDeUso> RolCasosDeUso { get; set; }
 
         public DbSet<Producto> Productos { get; set; }
         public DbSet<UnidadMedida> UnidadesMedida { get; set; }

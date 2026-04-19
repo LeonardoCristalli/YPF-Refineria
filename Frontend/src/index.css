@@ -1,5 +1,43 @@
 @import "tailwindcss";
 
-body {
-    background-color: #f3f4f6;
+@theme {
+  --color-ypf-blue: #004d9c;
+  --color-ypf-yellow: #ffcc00;
+  --color-industrial-gray: #f2f4f7;
+  --color-industrial-dark: #1a1f26;
+  --color-glass: rgba(255, 255, 255, 0.7);
+}
+
+@layer base {
+  body {
+    @apply bg-industrial-gray text-slate-900 font-sans;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-glass backdrop-blur-md border border-white/20 shadow-xl rounded-2xl;
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 bg-ypf-blue text-white rounded-lg font-semibold hover:bg-blue-800 transition-all active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-slate-400 hover:text-white hover:bg-white/10;
+  }
+
+  .nav-link.active {
+    @apply text-white bg-blue-600/20 border-r-4 border-blue-500;
+  }
+}
+
+/* Custom animations */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
