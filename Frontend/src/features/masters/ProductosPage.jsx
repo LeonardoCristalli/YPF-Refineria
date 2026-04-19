@@ -48,9 +48,9 @@ const ProductosPage = () => {
                 agent={agent.Productos} 
                 columns={columns} 
                 idField="id_Producto"
+                nameField="descripcion"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
             />
 
             <ProductoForm 

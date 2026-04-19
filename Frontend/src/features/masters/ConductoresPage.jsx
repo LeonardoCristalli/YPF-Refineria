@@ -49,9 +49,9 @@ const ConductoresPage = () => {
                 agent={agent.Conductores} 
                 columns={columns} 
                 idField="id_Conductor"
+                nameField="apellido"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
             />
 
             <ConductorForm 

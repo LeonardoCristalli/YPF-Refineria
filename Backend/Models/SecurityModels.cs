@@ -13,6 +13,7 @@ namespace Backend.Models
         public string? Apellido { get; set; }
         public string? NroDocumento { get; set; }
         public byte Id_TipoDocumento { get; set; }
+        public bool Activo { get; set; } = true;
     }
 
     [Table("t_Rol")]

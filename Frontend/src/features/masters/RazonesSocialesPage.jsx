@@ -51,9 +51,9 @@ const RazonesSocialesPage = () => {
                 agent={agent.RazonesSociales} 
                 columns={columns} 
                 idField="id_RazonSocial"
+                nameField="descripcion"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
             />
 
             <RazonSocialForm 

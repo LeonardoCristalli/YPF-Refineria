@@ -19,7 +19,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> Get()
         {
-            return await _context.Usuarios.ToListAsync();
+            return await _context.Usuarios.Where(u => u.Activo).ToListAsync();
         }
 
         [HttpPost]
@@ -56,7 +56,8 @@ namespace Backend.Controllers
         {
             var item = await _context.Usuarios.FindAsync(id);
             if (item == null) return NotFound();
-            _context.Usuarios.Remove(item);
+            item.Activo = false;
+            _context.Entry(item).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();
         }

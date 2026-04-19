@@ -50,9 +50,9 @@ const VehiculosPage = () => {
                 agent={agent.Vehiculos} 
                 columns={columns} 
                 idField="id_Vehiculo"
+                nameField="patenteChasis"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
             />
             
             <VehiculoForm 

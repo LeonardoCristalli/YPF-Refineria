@@ -29,6 +29,7 @@ const Basculas = createCrud('/Basculas');
 const Usuarios = createCrud('/Usuarios');
 const OrdenesTransporte = createCrud('/OrdenesTransporte');
 const Planificaciones = createCrud('/Planificaciones');
+const Ordenes = createCrud('/Ordenes');
 
 const Pesadas = {
     list: () => requests.get('/Pesadas'),
@@ -46,5 +47,6 @@ export default {
     Usuarios,
     OrdenesTransporte,
     Planificaciones,
+    Ordenes,
     Pesadas,
 };
