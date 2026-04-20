@@ -84,6 +84,10 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                                 required
+                                minLength={2}
+                                maxLength={150}
+                                pattern="^[a-zA-Z0-9\s\.\,\-]+$"
+                                title="Solo letras, números, puntos, comas y guiones"
                             />
                         </div>
 
@@ -92,6 +96,8 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                             <input 
                                 type="number" 
                                 step="0.01"
+                                min="0.01"
+                                max="10000"
                                 name="densidad"
                                 value={formData.densidad}
                                 onChange={handleChange}
@@ -103,12 +109,14 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Unidad de Medida (ID)</label>
                             <input 
-                                type="text"
+                                type="number"
                                 name="id_UnidadMedida" 
                                 value={formData.id_UnidadMedida}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                                 placeholder="2 (Liters)"
+                                min="1"
+                                required
                             />
                             <p className="text-xs text-gray-500 mt-1">Por defecto 2 (Automático)</p>
                         </div>
