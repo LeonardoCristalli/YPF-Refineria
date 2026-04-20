@@ -60,7 +60,11 @@ const RazonSocialForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             onClose();
         } catch (error) {
             console.error("Error saving Razon Social", error);
-            alert("Error al guardar Razón Social.");
+            if (Array.isArray(error)) {
+                alert("Errores de validación:\n" + error.join('\n'));
+            } else {
+                alert("Error al guardar Razón Social.");
+            }
         } finally {
             setLoading(false);
         }
@@ -90,6 +94,10 @@ const RazonSocialForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                             onChange={handleChange}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                             required
+                            minLength={2}
+                            maxLength={200}
+                            pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\.\,\-\&]+$"
+                            title="Solo caracteres alfanuméricos válidos"
                         />
                     </div>
 
@@ -103,6 +111,10 @@ const RazonSocialForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                             placeholder="XX-XXXXXXXX-X"
                             required
+                            minLength={11}
+                            maxLength={14}
+                            pattern="^[0-9]+(-[0-9]+)*$"
+                            title="El CUIT debe contener números y guiones (ej. 20-12345678-9)"
                         />
                     </div>
 

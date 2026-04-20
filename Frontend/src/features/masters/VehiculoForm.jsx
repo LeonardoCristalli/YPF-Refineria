@@ -75,7 +75,11 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             onClose();
         } catch (error) {
             console.error("Error saving vehicle", error);
-            alert("Error al guardar vehículo.");
+            if (Array.isArray(error)) {
+                alert("Errores de validación:\n" + error.join('\n'));
+            } else {
+                alert("Error al guardar vehículo.");
+            }
         } finally {
             setLoading(false);
         }
@@ -104,8 +108,12 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 name="patenteChasis"
                                 value={formData.patenteChasis}
                                 onChange={handleChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border uppercase"
                                 required
+                                minLength={6}
+                                maxLength={10}
+                                pattern="^[A-Za-z0-9]+$"
+                                title="Sin espacios ni caracteres especiales, por ej. AB123CD"
                             />
                         </div>
 
@@ -116,7 +124,10 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 name="patenteAcoplado"
                                 value={formData.patenteAcoplado}
                                 onChange={handleChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border uppercase"
+                                maxLength={10}
+                                pattern="^[A-Za-z0-9]*$"
+                                title="Sin espacios ni caracteres especiales"
                             />
                         </div>
 
@@ -128,6 +139,8 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 value={formData.pesoMaximo}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                min="0"
+                                step="0.01"
                             />
                         </div>
 
@@ -139,6 +152,8 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 value={formData.volumenMaximo}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                min="0"
+                                step="0.01"
                             />
                         </div>
                         
@@ -150,6 +165,8 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 value={formData.pesoSinCargas}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                min="0"
+                                step="0.01"
                             />
                         </div>
 
