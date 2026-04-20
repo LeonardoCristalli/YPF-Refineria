@@ -38,6 +38,12 @@ const Pesadas = {
     byOrdenTransporte: (id) => requests.get(`/Pesadas/ByOrdenTransporte/${id}`),
 };
 
+const Reportes = {
+    duracionOrdenes: () => requests.get('/Reportes/duracion-ordenes'),
+    ocupacionBasculas: () => requests.get('/Reportes/ocupacion-basculas'),
+    kpis: () => requests.get('/Reportes/kpis'),
+};
+
 export default {
     Vehiculos,
     Conductores,
@@ -49,4 +55,5 @@ export default {
     Planificaciones,
     Ordenes,
     Pesadas,
+    Reportes,
 };
