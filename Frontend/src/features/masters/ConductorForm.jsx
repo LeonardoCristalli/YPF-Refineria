@@ -55,7 +55,11 @@ const ConductorForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             onClose();
         } catch (error) {
             console.error("Error saving conductor", error);
-            alert("Error al guardar conductor.");
+            if (Array.isArray(error)) {
+                alert("Errores de validación:\n" + error.join('\n'));
+            } else {
+                alert("Error al guardar conductor.");
+            }
         } finally {
             setLoading(false);
         }
@@ -86,6 +90,10 @@ const ConductorForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                                 required
+                                minLength={2}
+                                maxLength={100}
+                                pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                                title="Solo letras y espacios"
                             />
                         </div>
 
@@ -98,6 +106,10 @@ const ConductorForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                                 required
+                                minLength={2}
+                                maxLength={100}
+                                pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                                title="Solo letras y espacios"
                             />
                         </div>
 
@@ -110,6 +122,10 @@ const ConductorForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                                 required
+                                minLength={6}
+                                maxLength={20}
+                                pattern="^[a-zA-Z0-9]+$"
+                                title="Documento debe ser alfanumérico sin espacios"
                             />
                         </div>
                     </div>

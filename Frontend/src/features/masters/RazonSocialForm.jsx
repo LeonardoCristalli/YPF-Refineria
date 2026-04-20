@@ -60,7 +60,11 @@ const RazonSocialForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             onClose();
         } catch (error) {
             console.error("Error saving Razon Social", error);
-            alert("Error al guardar Razón Social.");
+            if (Array.isArray(error)) {
+                alert("Errores de validación:\n" + error.join('\n'));
+            } else {
+                alert("Error al guardar Razón Social.");
+            }
         } finally {
             setLoading(false);
         }

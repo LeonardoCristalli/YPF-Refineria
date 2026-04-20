@@ -75,7 +75,11 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             onClose();
         } catch (error) {
             console.error("Error saving vehicle", error);
-            alert("Error al guardar vehículo.");
+            if (Array.isArray(error)) {
+                alert("Errores de validación:\n" + error.join('\n'));
+            } else {
+                alert("Error al guardar vehículo.");
+            }
         } finally {
             setLoading(false);
         }

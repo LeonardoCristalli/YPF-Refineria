@@ -4,6 +4,25 @@ const agent = axios.create({
     baseURL: 'http://localhost:5033/api',
 });
 
+agent.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response) {
+            const { data, status } = error.response;
+            if (status === 400 && data.errors) {
+                const modalStateErrors = [];
+                for (const key in data.errors) {
+                    if (data.errors[key]) {
+                        modalStateErrors.push(data.errors[key]);
+                    }
+                }
+                throw modalStateErrors.flat();
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 const responseBody = (response) => response.data;
 
 const requests = {
