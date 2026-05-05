@@ -11,6 +11,7 @@ namespace Backend.Models
         public string? Descripcion { get; set; }
         public decimal? Densidad { get; set; }
         public byte? Id_UnidadMedida { get; set; }
+        public bool Activo { get; set; } = true;
     }
 
     [Table("t_UnidadMedida")]
@@ -34,6 +35,7 @@ namespace Backend.Models
         public decimal? PesoSinCargas { get; set; }
         public decimal? PesoMaximo { get; set; }
         public decimal? VolumenMaximo { get; set; }
+        public bool Activo { get; set; } = true;
     }
 
     [Table("t_Conductor")]
@@ -45,6 +47,7 @@ namespace Backend.Models
         public string? Nombre { get; set; }
         public byte? Id_TipoDocumento { get; set; }
         public string? NroDocumento { get; set; }
+        public bool Activo { get; set; } = true;
     }
 
     [Table("t_RazonSocial")]
@@ -57,6 +60,7 @@ namespace Backend.Models
         public bool? EsCliente { get; set; }
         public bool? EsProveedor { get; set; }
         public bool? EsTransportista { get; set; }
+        public bool Activo { get; set; } = true;
     }
 
     [Table("t_TipoDocumentoIdentidad")]

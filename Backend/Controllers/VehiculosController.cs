@@ -19,7 +19,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vehiculo>>> GetVehiculos()
         {
-            return await _context.Vehiculos.ToListAsync();
+            return await _context.Vehiculos.Where(v => v.Activo).ToListAsync();
         }
 
         [HttpPost]
@@ -75,7 +75,8 @@ namespace Backend.Controllers
                 return NotFound();
             }
 
-            _context.Vehiculos.Remove(vehiculo);
+            vehiculo.Activo = false;
+            _context.Entry(vehiculo).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();

@@ -102,16 +102,53 @@ namespace Backend.Data
                  context.SaveChanges();
              }
 
-             // 7. Orden de Prueba
+             // 7. Tipos Documento
+             if (!context.TiposDocumentoIdentidad.Any())
+             {
+                 var tiposDoc = new TipoDocumentoIdentidad[]
+                 {
+                     new TipoDocumentoIdentidad { Id_TipoDocumento = 1, Descripcion = "DNI" },
+                     new TipoDocumentoIdentidad { Id_TipoDocumento = 2, Descripcion = "CUIL/CUIT" }
+                 };
+                 context.TiposDocumentoIdentidad.AddRange(tiposDoc);
+                 context.SaveChanges();
+             }
+
+             // 8. Puestos
+             if (!context.Puestos.Any())
+             {
+                 var puestos = new PuestoExpedicionRecepcion[]
+                 {
+                     new PuestoExpedicionRecepcion { Id_PuestoExpedicionRecepcion = 1, Descripcion = "Puesto Acceso Norte" },
+                     new PuestoExpedicionRecepcion { Id_PuestoExpedicionRecepcion = 2, Descripcion = "Puesto Salida Sur" }
+                 };
+                 context.Puestos.AddRange(puestos);
+                 context.SaveChanges();
+             }
+
+             // 9. Tanques
+             if (!context.Tanques.Any())
+             {
+                 var tanques = new Tanque[]
+                 {
+                     new Tanque { Id_Tanque = 1, Descripcion = "Tanque A1 - Crudo", VolumenMaximo = 50000, VolumenOcupado = 10000 },
+                     new Tanque { Id_Tanque = 2, Descripcion = "Tanque B1 - Nafta", VolumenMaximo = 30000, VolumenOcupado = 5000 }
+                 };
+                 context.Tanques.AddRange(tanques);
+                 context.SaveChanges();
+             }
+
+             // 10. Orden de Prueba
              if (!context.Ordenes.Any())
              {
                  var orden = new Orden
                  {
-                     Id_Orden = 1, // Explicit ID for linking
+                     Id_Orden = 1,
                      Id_EstadoOrden = 1,
                      Id_TipoOrden = 1, // Recepcion
                      FechaInicioPlanificacion = DateTime.Now,
-                     FechaPlanificacion = DateTime.Now.AddDays(1)
+                     FechaPlanificacion = DateTime.Now.AddDays(1),
+                     Id_PuestoExpedicionRecepcion = 1
                  };
                  context.Ordenes.Add(orden);
                  context.SaveChanges();
@@ -133,8 +170,8 @@ namespace Backend.Data
                  {
                      Id_OrdenTransporte = 1,
                      Id_OrdenDetalle = 1,
-                     Id_Vehiculo = 1, // From previous seeds
-                     Id_Conductor = 1, // From previous seeds
+                     Id_Vehiculo = 1,
+                     Id_Conductor = 1,
                      Id_RazonSocialTransportista = 1 // YPF Transportes
                  };
                  context.OrdenTransportes.Add(transporte);
@@ -150,11 +187,20 @@ namespace Backend.Data
                  };
                  context.Planificaciones.Add(plan);
                  context.SaveChanges();
+
+                 // Tanque Almacenamiento link
+                 var tanqueAlma = new TanqueAlmacenamiento
+                 {
+                     Id_TanqueAlmacenamiento = 1,
+                     Id_OrdenDetalle = 1,
+                     Id_Tanque = 2,
+                     Volumen = 30000
+                 };
+                 context.TanqueAlmacenamientos.Add(tanqueAlma);
+                 context.SaveChanges();
              }
 
-
-
-             // 7.4 Tipos Pesada
+             // 11. Tipos Pesada e Infraestructura
              if (!context.TiposPesada.Any())
              {
                  var tiposPesada = new TipoPesada[]
@@ -166,7 +212,6 @@ namespace Backend.Data
                  context.SaveChanges();
              }
 
-             // 8. Basculas
              if (!context.Basculas.Any())
              {
                  var basculas = new Bascula[]
@@ -178,19 +223,51 @@ namespace Backend.Data
                  context.SaveChanges();
              }
 
-             // 9. Usuarios
+             if (!context.DispositivosDetectores.Any())
+             {
+                 var detectores = new DispositivoDetector[]
+                 {
+                     new DispositivoDetector { Id_DispositivoDetector = 1, Descripcion = "Detector Barrera 1", IP = "192.168.1.150" },
+                     new DispositivoDetector { Id_DispositivoDetector = 2, Descripcion = "Detector Barrera 2", IP = "192.168.1.151" }
+                 };
+                 context.DispositivosDetectores.AddRange(detectores);
+                 context.SaveChanges();
+             }
+
+             // 12. Seguridad (Roles y Usuarios)
+             if (!context.Roles.Any())
+             {
+                 var roles = new Rol[]
+                 {
+                     new Rol { Id_Rol = 1, Descripcion = "Administrador" },
+                     new Rol { Id_Rol = 2, Descripcion = "Operador Balanza" },
+                     new Rol { Id_Rol = 3, Descripcion = "Planificador" }
+                 };
+                 context.Roles.AddRange(roles);
+                 context.SaveChanges();
+             }
+
              if (!context.Usuarios.Any())
              {
                  var usuarios = new Usuario[]
                  {
-                     new Usuario { IdRed = "192.168.1.50", Nombre = "Admin", Apellido = "Terminal", NroDocumento = "11111111", Id_TipoDocumento = 1 },
-                     new Usuario { IdRed = "192.168.1.51", Nombre = "Operador", Apellido = "Acceso", NroDocumento = "22222222", Id_TipoDocumento = 1 }
+                     new Usuario { IdRed = "YPF\\ADMIN", Nombre = "Admin", Apellido = "Sistema", NroDocumento = "11111111", Id_TipoDocumento = 1 },
+                     new Usuario { IdRed = "YPF\\OPERADOR", Nombre = "Pedro", Apellido = "Gomez", NroDocumento = "22222222", Id_TipoDocumento = 1 }
                  };
                  context.Usuarios.AddRange(usuarios);
+                 context.SaveChanges();
+
+                 // Usuario Roles
+                 var userRoles = new UsuarioRol[]
+                 {
+                     new UsuarioRol { Id_Usuario = 1, Id_Rol = 1 },
+                     new UsuarioRol { Id_Usuario = 2, Id_Rol = 2 }
+                 };
+                 context.UsuarioRoles.AddRange(userRoles);
                  context.SaveChanges();
              }
 
              Console.WriteLine("Data Seeding Completed!");
-        }
-    }
-}
+         }
+     }
+ }

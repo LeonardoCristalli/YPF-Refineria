@@ -50,9 +50,9 @@ const UsuariosPage = () => {
                 agent={agent.Usuarios} 
                 columns={columns} 
                 idField="id_Usuario"
+                nameField="apellido"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
             />
 
             <UsuarioForm 

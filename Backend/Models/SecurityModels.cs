@@ -13,6 +13,7 @@ namespace Backend.Models
         public string? Apellido { get; set; }
         public string? NroDocumento { get; set; }
         public byte Id_TipoDocumento { get; set; }
+        public bool Activo { get; set; } = true;
     }
 
     [Table("t_Rol")]
@@ -30,22 +31,5 @@ namespace Backend.Models
         public int Id_UsuarioRol { get; set; }
         public int Id_Usuario { get; set; }
         public int Id_Rol { get; set; }
-    }
-
-    [Table("t_CasoDeUso")]
-    public class CasoDeUso
-    {
-        [Key]
-        public int Id_CasoDeUso { get; set; }
-        public string? Descripcion { get; set; }
-    }
-
-    [Table("t_RolCasoDeUso")]
-    public class RolCasoDeUso
-    {
-        [Key]
-        public int Id_RolCasoDeUso { get; set; }
-        public int Id_Rol { get; set; }
-        public int Id_CasoDeUso { get; set; }
     }
 }
