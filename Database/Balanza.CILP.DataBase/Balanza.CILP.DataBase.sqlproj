@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>Balanza.CILP.DataBase</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{834f447a-c4f4-4bec-a805-af045075e8cd}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql160DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>Balanza.CILP.DataBase</RootNamespace>
+    <AssemblyName>Balanza.CILP.DataBase</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="tables" />
+    <Folder Include="storedprocedures" />
+    <Folder Include="functions" />
+    <Folder Include="scripts" />
+    <Folder Include="scripts\configuration" />
+    <Folder Include="scripts\sysdata" />
+    <Folder Include="scripts\initdata" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tables\dbo.t_Bascula.sql" />
+    <Build Include="tables\dbo.t_CasoDeUso.sql" />
+    <Build Include="tables\dbo.t_Conductor.sql" />
+    <Build Include="tables\dbo.t_DispositivoDetector.sql" />
+    <Build Include="tables\dbo.t_EstadoOrden.sql" />
+    <Build Include="tables\dbo.t_Orden.sql" />
+    <Build Include="tables\dbo.t_OrdenDetalle.sql" />
+    <Build Include="tables\dbo.t_OrdenTransporte.sql" />
+    <Build Include="tables\dbo.t_Pesada.sql" />
+    <Build Include="tables\dbo.t_Planificacion.sql" />
+    <Build Include="tables\dbo.t_Producto.sql" />
+    <Build Include="tables\dbo.t_PuestoExpedicionRecepcion.sql" />
+    <Build Include="tables\dbo.t_RazonSocial.sql" />
+    <Build Include="tables\dbo.t_Rol.sql" />
+    <Build Include="tables\dbo.t_RolCasoDeUso.sql" />
+    <Build Include="tables\dbo.t_Tanque.sql" />
+    <Build Include="tables\dbo.t_TanqueAlmacenamiento.sql" />
+    <Build Include="tables\dbo.t_TipoDocumentoIdentidad.sql" />
+    <Build Include="tables\dbo.t_TipoOrden.sql" />
+    <Build Include="tables\dbo.t_TipoPesada.sql" />
+    <Build Include="tables\dbo.t_UnidadMedida.sql" />
+    <Build Include="tables\dbo.t_Usuario.sql" />
+    <Build Include="tables\dbo.t_UsuarioRol.sql" />
+    <Build Include="tables\dbo.t_Vehiculo.sql" />
+    <Build Include="functions\dbo.fn_GetCurrentUser.sql" />
+    <None Include="scripts\configuration\script_disabled_identity-cache.sql" />
+    <None Include="scripts\configuration\script_enabled_isolation-snapshot.sql" />
+    <None Include="scripts\sysdata\script_sysdata_t_tipoorden.sql" />
+    <None Include="scripts\sysdata\script_sysdata_t_tipodocumentoidentidad.sql" />
+    <None Include="scripts\sysdata\script_sysdata_t_tipopesada.sql" />
+    <Build Include="tables\dbo.t_EstadoOrdenTransporte.sql" />
+    <Build Include="storedprocedures\dbo.pr_context_save.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="scripts\Script.PostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="scripts\sysdata\script_sysdata_t_unidadmedida.sql" />
+    <None Include="scripts\sysdata\script_sysdata_t_estadoorden.sql" />
+    <None Include="scripts\initdata\script_initdata_t_rol.sql" />
+    <None Include="scripts\initdata\script_initdata_t_rolcasodeuso.sql" />
+    <None Include="scripts\initdata\script_initdata_t_casodeuso.sql" />
+    <None Include="scripts\sysdata\script_sysdata_t_estadoordentransporte.sql" />
+    <None Include="Balanza.CILP.DataBase.publish.xml" />
+  </ItemGroup>
+</Project>

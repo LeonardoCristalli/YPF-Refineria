@@ -25,6 +25,11 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# SQL Project files
+*.dacpac
+*.dbmdl
+*.sqlcmdvars
+
 # Node.js / React
 node_modules/
 /Frontend/node_modules/
