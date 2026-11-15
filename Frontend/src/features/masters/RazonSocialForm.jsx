@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
-import agent from '../../api/agent';
+import agent, { getErrorMessage } from '../../api/agent';
 
 const RazonSocialForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
     const [loading, setLoading] = useState(false);
@@ -60,7 +60,7 @@ const RazonSocialForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             onClose();
         } catch (error) {
             console.error("Error saving Razon Social", error);
-            alert("Error al guardar Razón Social.");
+            alert(getErrorMessage(error, "Error al guardar Razón Social."));
         } finally {
             setLoading(false);
         }
@@ -90,6 +90,10 @@ const RazonSocialForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                             onChange={handleChange}
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                             required
+                            minLength={2}
+                            maxLength={50}
+                            pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ\s.,\-\&]+"
+                            title="Solo caracteres alfanuméricos válidos"
                         />
                     </div>
 
@@ -103,6 +107,10 @@ const RazonSocialForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                             placeholder="XX-XXXXXXXX-X"
                             required
+                            minLength={11}
+                            maxLength={13}
+                            pattern="[0-9]+(\-[0-9]+)*"
+                            title="El CUIT debe contener números y guiones (ej. 20-12345678-9)"
                         />
                     </div>
 

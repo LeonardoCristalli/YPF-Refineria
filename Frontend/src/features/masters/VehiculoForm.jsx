@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
-import agent from '../../api/agent';
+import agent, { getErrorMessage } from '../../api/agent';
 
 const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
     const [loading, setLoading] = useState(false);
@@ -50,7 +50,9 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        // Las patentes se guardan en mayúsculas (el backend valida ^[A-Z0-9]+$).
+        const normalized = name.startsWith('patente') ? value.toUpperCase() : value;
+        setFormData(prev => ({ ...prev, [name]: normalized }));
     };
 
     const handleSubmit = async (e) => {
@@ -75,7 +77,7 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             onClose();
         } catch (error) {
             console.error("Error saving vehicle", error);
-            alert("Error al guardar vehículo.");
+            alert(getErrorMessage(error, "Error al guardar vehículo."));
         } finally {
             setLoading(false);
         }
@@ -104,8 +106,12 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 name="patenteChasis"
                                 value={formData.patenteChasis}
                                 onChange={handleChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border uppercase"
                                 required
+                                minLength={6}
+                                maxLength={8}
+                                pattern="[A-Z0-9]+"
+                                title="Sin espacios ni caracteres especiales, por ej. AB123CD"
                             />
                         </div>
 
@@ -116,7 +122,12 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 name="patenteAcoplado"
                                 value={formData.patenteAcoplado}
                                 onChange={handleChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border uppercase"
+                                required
+                                minLength={6}
+                                maxLength={8}
+                                pattern="[A-Z0-9]+"
+                                title="Sin espacios ni caracteres especiales, por ej. AB123CD"
                             />
                         </div>
 
@@ -128,6 +139,8 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 value={formData.pesoMaximo}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                min="0"
+                                step="0.01"
                             />
                         </div>
 
@@ -139,6 +152,8 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 value={formData.volumenMaximo}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                min="0"
+                                step="0.01"
                             />
                         </div>
                         
@@ -150,6 +165,8 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 value={formData.pesoSinCargas}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                min="0"
+                                step="0.01"
                             />
                         </div>
 
