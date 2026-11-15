@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent, { getErrorMessage } from '../../api/agent';
+import agent from '../../api/agent';
 import RazonSocialForm from './RazonSocialForm';
 
 const RazonesSocialesPage = () => {
@@ -27,19 +27,6 @@ const RazonesSocialesPage = () => {
         setIsFormOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('¿Seguro que desea eliminar esta Razón Social?')) {
-            try {
-                await agent.RazonesSociales.delete(id);
-                setRefreshKey(prev => prev + 1);
-                window.location.reload();
-            } catch (error) {
-                console.error("Error deleting Razon Social", error);
-                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
-            }
-        }
-    };
-
     const handleSuccess = () => {
         setRefreshKey(prev => prev + 1);
         window.location.reload();
@@ -52,9 +39,9 @@ const RazonesSocialesPage = () => {
                 agent={agent.RazonesSociales} 
                 columns={columns} 
                 idField="id_RazonSocial"
+                nameField="descripcion"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
             />
 
             <RazonSocialForm 

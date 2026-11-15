@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent, { getErrorMessage } from '../../api/agent';
+import agent from '../../api/agent';
 import UsuarioForm from './UsuarioForm';
 
 const UsuariosPage = () => {
@@ -26,19 +26,6 @@ const UsuariosPage = () => {
         setIsFormOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('¿Seguro que desea eliminar este usuario?')) {
-            try {
-                await agent.Usuarios.delete(id);
-                setRefreshKey(prev => prev + 1);
-                window.location.reload();
-            } catch (error) {
-                console.error("Error deleting Usuario", error);
-                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
-            }
-        }
-    };
-
     const handleSuccess = () => {
         setRefreshKey(prev => prev + 1);
         window.location.reload();
@@ -51,9 +38,9 @@ const UsuariosPage = () => {
                 agent={agent.Usuarios} 
                 columns={columns} 
                 idField="id_Usuario"
+                nameField="apellido"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
             />
 
             <UsuarioForm 

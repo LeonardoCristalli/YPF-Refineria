@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent, { getErrorMessage } from '../../api/agent';
+import agent from '../../api/agent';
 import ProductoForm from './ProductoForm';
 
 const ProductosPage = () => {
@@ -24,19 +24,6 @@ const ProductosPage = () => {
         setIsFormOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('¿Seguro que desea eliminar este producto?')) {
-            try {
-                await agent.Productos.delete(id);
-                setRefreshKey(prev => prev + 1);
-                window.location.reload();
-            } catch (error) {
-                console.error("Error deleting product", error);
-                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
-            }
-        }
-    };
-
     const handleSuccess = () => {
         setRefreshKey(prev => prev + 1);
         window.location.reload();
@@ -49,9 +36,9 @@ const ProductosPage = () => {
                 agent={agent.Productos} 
                 columns={columns} 
                 idField="id_Producto"
+                nameField="descripcion"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
             />
 
             <ProductoForm 
