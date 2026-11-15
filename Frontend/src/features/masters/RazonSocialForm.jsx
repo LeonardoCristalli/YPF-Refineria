@@ -109,7 +109,7 @@ const RazonSocialForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                             required
                             minLength={11}
                             maxLength={13}
-                            pattern="[0-9]+(\-[0-9]+)*"
+                            pattern="[0-9]+(-[0-9]+)*"
                             title="El CUIT debe contener números y guiones (ej. 20-12345678-9)"
                         />
                     </div>

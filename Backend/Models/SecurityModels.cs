@@ -15,7 +15,8 @@ namespace Backend.Models
         [Column("IdRed_Usuario")]
         [Required(ErrorMessage = "El ID de red es requerido.")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "El ID de red debe tener entre 3 y 50 caracteres.")]
-        [RegularExpression(@"^[a-zA-Z0-9\.\_\-\\]+$", ErrorMessage = "El ID de red solo puede contener letras, números, puntos, guiones y \\.")]
+        // Ojo: .NET rechaza escapes innecesarios como \_ (RegexParseException -> 500).
+        [RegularExpression(@"^[a-zA-Z0-9._\\-]+$", ErrorMessage = "El ID de red solo puede contener letras, números, puntos, guiones y \\.")]
         public string IdRed { get; set; } = "";
 
         [Column("Nombre_Usuario")]
