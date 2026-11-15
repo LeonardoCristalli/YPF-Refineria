@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent, { getErrorMessage } from '../../api/agent';
+import agent from '../../api/agent';
 import VehiculoForm from './VehiculoForm';
 
 const VehiculosPage = () => {
@@ -26,19 +26,6 @@ const VehiculosPage = () => {
         setIsFormOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('¿Seguro que desea eliminar este vehículo?')) {
-            try {
-                await agent.Vehiculos.delete(id);
-                setRefreshKey(prev => prev + 1);
-                window.location.reload();
-            } catch (error) {
-                console.error("Error deleting vehicle", error);
-                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
-            }
-        }
-    };
-
     const handleSuccess = () => {
         setRefreshKey(prev => prev + 1);
         window.location.reload();
@@ -51,9 +38,9 @@ const VehiculosPage = () => {
                 agent={agent.Vehiculos} 
                 columns={columns} 
                 idField="id_Vehiculo"
+                nameField="patenteChasis"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
             />
             
             <VehiculoForm 

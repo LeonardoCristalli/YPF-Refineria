@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent, { getErrorMessage } from '../../api/agent';
+import agent from '../../api/agent';
 import { Eye } from 'lucide-react';
 import OrdenDetailsModal from './OrdenDetailsModal';
 import OrdenTransporteForm from './OrdenTransporteForm';
@@ -24,19 +24,6 @@ const OrdenesTransportePage = () => {
     const handleEdit = (orden) => {
         setSelectedOrden(orden);
         setIsCreateModalOpen(true);
-    };
-
-    const handleDelete = async (id) => {
-        if (window.confirm('¿Está seguro de eliminar esta Orden de Transporte?')) {
-            try {
-                await agent.OrdenesTransporte.delete(id);
-                setRefreshKey(prev => prev + 1);
-                window.location.reload();
-            } catch (error) {
-                console.error("Error deleting order", error);
-                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
-            }
-        }
     };
 
     const handleSuccessCreate = () => {
@@ -88,7 +75,7 @@ const OrdenesTransportePage = () => {
                 actions={actions}
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
+                softDelete={false}
             />
 
             <OrdenDetailsModal 

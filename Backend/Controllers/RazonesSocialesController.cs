@@ -19,7 +19,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RazonSocial>>> Get()
         {
-            return await _context.RazonesSociales.ToListAsync();
+            return await _context.RazonesSociales.Where(r => r.Activo).ToListAsync();
         }
 
         [HttpGet("{id}")]
@@ -52,7 +52,8 @@ namespace Backend.Controllers
         {
             var item = await _context.RazonesSociales.FindAsync(id);
             if (item == null) return NotFound();
-            _context.RazonesSociales.Remove(item);
+            item.Activo = false;
+            _context.Entry(item).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return NoContent();
         }

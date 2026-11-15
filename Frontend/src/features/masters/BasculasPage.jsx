@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent, { getErrorMessage } from '../../api/agent';
+import agent from '../../api/agent';
 import BasculaForm from './BasculaForm';
 
 const BasculasPage = () => {
@@ -27,19 +27,6 @@ const BasculasPage = () => {
         setIsFormOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('¿Seguro que desea eliminar esta Báscula?')) {
-            try {
-                await agent.Basculas.delete(id);
-                setRefreshKey(prev => prev + 1);
-                window.location.reload();
-            } catch (error) {
-                console.error("Error deleting Bascula", error);
-                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
-            }
-        }
-    };
-
     const handleSuccess = () => {
         setRefreshKey(prev => prev + 1);
         window.location.reload();
@@ -54,7 +41,7 @@ const BasculasPage = () => {
                 idField="id_Bascula"
                 onCreate={handleCreate}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
+                softDelete={false}
             />
 
             <BasculaForm 

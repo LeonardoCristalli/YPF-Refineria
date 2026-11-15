@@ -1,7 +1,8 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './layout/MainLayout';
-import PesadaForm from './features/pesadas/PesadaForm';
+import Dashboard from './features/dashboard/Dashboard';
+import PesadasPage from './features/pesadas/PesadasPage';
 import OrdenesTransportePage from './features/masters/OrdenesTransportePage';
 import VehiculosPage from './features/masters/VehiculosPage';
 import ConductoresPage from './features/masters/ConductoresPage';
@@ -9,16 +10,20 @@ import ProductosPage from './features/masters/ProductosPage';
 import RazonesSocialesPage from './features/masters/RazonesSocialesPage';
 import BasculasPage from './features/masters/BasculasPage';
 import UsuariosPage from './features/masters/UsuariosPage';
+import AutorizacionesPage from './features/planificacion/AutorizacionesPage';
+import ReportesPage from './features/reportes/ReportesPage';
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
-        <Route index element={<div className="text-center p-10"><h1 className="text-3xl text-gray-800 font-bold">Bienvenido a CILP Prototype</h1><p className="text-gray-600 mt-2">Seleccione una opción del menú lateral.</p></div>} />
+        <Route index element={<Dashboard />} />
         
         {/* Operaciones */}
-        <Route path="pesadas" element={<PesadaForm />} />
+        <Route path="pesadas" element={<PesadasPage />} />
         <Route path="ordenes-transporte" element={<OrdenesTransportePage />} />
+        <Route path="planificacion" element={<AutorizacionesPage />} />
+        <Route path="reportes" element={<ReportesPage />} />
         
         {/* Maestros */}
         <Route path="vehiculos" element={<VehiculosPage />} />

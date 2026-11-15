@@ -29,12 +29,19 @@ const Basculas = createCrud('/Basculas');
 const Usuarios = createCrud('/Usuarios');
 const OrdenesTransporte = createCrud('/OrdenesTransporte');
 const Planificaciones = createCrud('/Planificaciones');
+const Ordenes = createCrud('/Ordenes');
 
 const Pesadas = {
     list: () => requests.get('/Pesadas'),
     create: (pesada) => requests.post('/Pesadas', pesada),
     byPlanificacion: (id) => requests.get(`/Pesadas/ByPlanificacion/${id}`),
     byOrdenTransporte: (id) => requests.get(`/Pesadas/ByOrdenTransporte/${id}`),
+};
+
+const Reportes = {
+    duracionOrdenes: () => requests.get('/Reportes/duracion-ordenes'),
+    ocupacionBasculas: () => requests.get('/Reportes/ocupacion-basculas'),
+    kpis: () => requests.get('/Reportes/kpis'),
 };
 
 export default {
@@ -46,7 +53,9 @@ export default {
     Usuarios,
     OrdenesTransporte,
     Planificaciones,
+    Ordenes,
     Pesadas,
+    Reportes,
 };
 
 // Devuelve el mensaje de error que manda el backend (ProblemDetails.detail, texto plano

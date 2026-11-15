@@ -88,6 +88,10 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                                 required
+                                minLength={2}
+                                maxLength={50}
+                                pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ\s.,\-]+"
+                                title="Letras, números, espacios, puntos, comas y guiones"
                             />
                         </div>
 
@@ -125,12 +129,14 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Unidad de Medida (ID)</label>
                             <input 
-                                type="text"
+                                type="number"
                                 name="id_UnidadMedida" 
                                 value={formData.id_UnidadMedida}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                                 placeholder="3 (Litros)"
+                                min="1"
+                                required
                             />
                             <p className="text-xs text-gray-500 mt-1">1 = Kilos, 2 = Toneladas, 3 = Litros, 4 = Galón</p>
                         </div>

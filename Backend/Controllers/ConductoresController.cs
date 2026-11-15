@@ -19,7 +19,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Conductor>>> GetConductores()
         {
-            return await _context.Conductores.ToListAsync();
+            return await _context.Conductores.Where(c => c.Activo).ToListAsync();
         }
 
         [HttpPost]
@@ -75,7 +75,8 @@ namespace Backend.Controllers
                 return NotFound();
             }
 
-            _context.Conductores.Remove(conductor);
+            conductor.Activo = false;
+            _context.Entry(conductor).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();

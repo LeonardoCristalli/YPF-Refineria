@@ -19,7 +19,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
         {
-            return await _context.Productos.ToListAsync();
+            return await _context.Productos.Where(p => p.Activo).ToListAsync();
         }
 
         [HttpPost]
@@ -80,7 +80,8 @@ namespace Backend.Controllers
                 return NotFound();
             }
 
-            _context.Productos.Remove(producto);
+            producto.Activo = false;
+            _context.Entry(producto).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();
