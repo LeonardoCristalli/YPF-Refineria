@@ -3,7 +3,8 @@
     ,[IdRed_Usuario]		VARCHAR(50)			NOT NULL
     ,[Nombre_Usuario]		VARCHAR(100)		NOT NULL
     ,[Apellido_Usuario]		VARCHAR(100)		NOT NULL
-    ,[NroDocumento_Usuario] VARCHAR				NOT NULL
+    ,[NroDocumento_Usuario] VARCHAR(12)			NOT NULL
+    ,[PasswordHash_Usuario] VARCHAR(255)		NOT NULL
     ,[Id_TipoDocumento]		TINYINT				NOT NULL
     ,[Activo_Usuario]		BIT	DEFAULT(1)		NOT NULL
 	,[Audit_insert_date]	DATETIME			DEFAULT(GETDATE()) NOT NULL

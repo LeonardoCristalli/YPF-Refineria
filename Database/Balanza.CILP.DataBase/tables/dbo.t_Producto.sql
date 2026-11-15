@@ -3,6 +3,7 @@
     ,[Descripcion_Producto]     VARCHAR(50)         NOT NULL
     ,[Densidad_Producto]        DECIMAL(4,3)        NOT NULL
     ,[Id_UnidadMedida]          TINYINT             NOT NULL
+    ,[ToleranciaPorc_Producto]  DECIMAL(5,2)        DEFAULT(0.5) NOT NULL
 	,[Activo_Producto]		    BIT					DEFAULT(1) NOT NULL
 	,[Audit_Insert_Date]	    DATETIME			DEFAULT(GETDATE()) NOT	NULL
 	,[Audit_Insert_User]	    VARCHAR(50)			DEFAULT(dbo.fn_getcurrentuser()) NOT NULL

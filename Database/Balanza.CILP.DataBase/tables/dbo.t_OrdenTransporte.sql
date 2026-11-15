@@ -4,6 +4,7 @@
     ,[Id_RazonSocialTransportista]              INT                         NOT NULL
     ,[Id_Vehiculo]                              INT                         NOT NULL
     ,[Id_Conductor]                             INT                         NOT NULL
+    ,[Id_EstadoOrdenTransporte]                 TINYINT                     DEFAULT(1) NOT NULL
     ,[FechaPlanificacion_OrdenTransporte]       DATETIME                    NOT NULL
     ,[FechaFinPlanificacion_OrdenTransporte]    DATETIME                    NULL
     ,[FechaInicioEjecucion_OrdenTransporte]     DATETIME                    NULL
@@ -20,6 +21,7 @@
     ,CONSTRAINT [FK_OrdenTransporte_RazonSocialTransportista] FOREIGN KEY([Id_RazonSocialTransportista]) REFERENCES [t_RazonSocial]([Id_RazonSocial])
     ,CONSTRAINT [FK_OrdenTransporte_Vehiculo] FOREIGN KEY([Id_Vehiculo]) REFERENCES [t_Vehiculo]([Id_Vehiculo])
     ,CONSTRAINT [FK_OrdenTransporte_Conductor] FOREIGN KEY([Id_Conductor]) REFERENCES [t_Conductor]([Id_Conductor])
+    ,CONSTRAINT [FK_OrdenTransporte_EstadoOrdenTransporte] FOREIGN KEY([Id_EstadoOrdenTransporte]) REFERENCES [t_EstadoOrdenTransporte]([Id_EstadoOrdenTransporte])
 );
 GO
 --
