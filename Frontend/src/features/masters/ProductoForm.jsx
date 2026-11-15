@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
-import agent from '../../api/agent';
+import agent, { getErrorMessage } from '../../api/agent';
 
 const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         descripcion: '',
         densidad: '',
-        id_UnidadMedida: '2' // Defaulting to Liters/m3 for prototype
+        toleranciaPorc: '0.5',
+        id_UnidadMedida: '3' // 3 = Litros (sysdata t_UnidadMedida)
     });
 
     useEffect(() => {
@@ -16,13 +17,15 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                 setFormData({
                     descripcion: initialValues.descripcion || '',
                     densidad: initialValues.densidad || '',
-                    id_UnidadMedida: initialValues.id_UnidadMedida || '2'
+                    toleranciaPorc: initialValues.toleranciaPorc ?? '0.5',
+                    id_UnidadMedida: initialValues.id_UnidadMedida || '3'
                 });
             } else {
                 setFormData({
                     descripcion: '',
                     densidad: '',
-                    id_UnidadMedida: '2'
+                    toleranciaPorc: '0.5',
+                    id_UnidadMedida: '3'
                 });
             }
         }
@@ -40,6 +43,7 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             const payload = {
                 ...formData,
                 densidad: formData.densidad ? parseFloat(formData.densidad) : null,
+                toleranciaPorc: parseFloat(formData.toleranciaPorc),
                 id_UnidadMedida: parseInt(formData.id_UnidadMedida),
                 id_Producto: initialValues ? initialValues.id_Producto : 0
             };
@@ -53,7 +57,7 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             onClose();
         } catch (error) {
             console.error("Error saving product", error);
-            alert("Error al guardar producto.");
+            alert(getErrorMessage(error, "Error al guardar producto."));
         } finally {
             setLoading(false);
         }
@@ -90,14 +94,32 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Densidad (g/cm3)</label>
                             <input 
-                                type="number" 
-                                step="0.01"
+                                type="number"
+                                step="0.001"
+                                min="0"
+                                max="9.999"
                                 name="densidad"
                                 value={formData.densidad}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                                 required
                             />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Tolerancia de pesaje (%)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                name="toleranciaPorc"
+                                value={formData.toleranciaPorc}
+                                onChange={handleChange}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                required
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Margen admitido en la pesada (CU78)</p>
                         </div>
 
                         <div>
@@ -108,9 +130,9 @@ const ProductoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 value={formData.id_UnidadMedida}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                                placeholder="2 (Liters)"
+                                placeholder="3 (Litros)"
                             />
-                            <p className="text-xs text-gray-500 mt-1">Por defecto 2 (Automático)</p>
+                            <p className="text-xs text-gray-500 mt-1">1 = Kilos, 2 = Toneladas, 3 = Litros, 4 = Galón</p>
                         </div>
                     </div>
 

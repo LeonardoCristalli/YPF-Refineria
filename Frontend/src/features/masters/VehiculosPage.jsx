@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent from '../../api/agent';
+import agent, { getErrorMessage } from '../../api/agent';
 import VehiculoForm from './VehiculoForm';
 
 const VehiculosPage = () => {
@@ -34,6 +34,7 @@ const VehiculosPage = () => {
                 window.location.reload();
             } catch (error) {
                 console.error("Error deleting vehicle", error);
+                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
             }
         }
     };

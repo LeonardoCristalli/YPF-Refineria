@@ -10,6 +10,7 @@ const OrdenTransporteForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
         id_RazonSocialTransportista: '',
         id_Vehiculo: '',
         id_Conductor: '',
+        nroRemito: '',
         cantidad: '',
         fecha: new Date().toISOString().split('T')[0]
     });
@@ -32,6 +33,7 @@ const OrdenTransporteForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                     id_RazonSocialTransportista: initialValues.id_RazonSocialTransportista || '',
                     id_Vehiculo: initialValues.id_Vehiculo || '',
                     id_Conductor: initialValues.id_Conductor || '',
+                    nroRemito: initialValues.ordenDetalle?.nroRemito || '',
                     cantidad: initialValues.ordenDetalle?.peso || '',
                     fecha: initialValues.ordenDetalle?.orden?.fechaPlanificacion 
                         ? initialValues.ordenDetalle.orden.fechaPlanificacion.split('T')[0] 
@@ -45,6 +47,7 @@ const OrdenTransporteForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                     id_RazonSocialTransportista: '',
                     id_Vehiculo: '',
                     id_Conductor: '',
+                    nroRemito: '',
                     cantidad: '',
                     fecha: new Date().toISOString().split('T')[0]
                 });
@@ -88,6 +91,7 @@ const OrdenTransporteForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                 id_RazonSocialTransportista: parseInt(formData.id_RazonSocialTransportista),
                 id_Vehiculo: parseInt(formData.id_Vehiculo),
                 id_Conductor: parseInt(formData.id_Conductor),
+                nroRemito: parseInt(formData.nroRemito),
                 cantidad: parseFloat(formData.cantidad),
                 fecha: new Date(formData.fecha).toISOString()
             };
@@ -146,6 +150,21 @@ const OrdenTransporteForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
                                 placeholder="Ej: 30000"
+                                required
+                            />
+                        </div>
+
+                        {/* Remito */}
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700">Nro. de Remito</label>
+                            <input
+                                type="number"
+                                name="nroRemito"
+                                value={formData.nroRemito}
+                                onChange={handleChange}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                min="1"
+                                step="1"
                                 required
                             />
                         </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent from '../../api/agent';
+import agent, { getErrorMessage } from '../../api/agent';
 import ConductorForm from './ConductorForm';
 
 const ConductoresPage = () => {
@@ -33,6 +33,7 @@ const ConductoresPage = () => {
                 window.location.reload();
             } catch (error) {
                 console.error("Error deleting conductor", error);
+                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
             }
         }
     };

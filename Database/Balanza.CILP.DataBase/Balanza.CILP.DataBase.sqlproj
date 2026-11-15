@@ -63,6 +63,7 @@
     <Folder Include="scripts\configuration" />
     <Folder Include="scripts\sysdata" />
     <Folder Include="scripts\initdata" />
+    <Folder Include="scripts\testdata" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="tables\dbo.t_Bascula.sql" />
@@ -107,6 +108,9 @@
     <None Include="scripts\initdata\script_initdata_t_rol.sql" />
     <None Include="scripts\initdata\script_initdata_t_rolcasodeuso.sql" />
     <None Include="scripts\initdata\script_initdata_t_casodeuso.sql" />
+    <None Include="scripts\initdata\script_initdata_t_puestoexpedicionrecepcion.sql" />
+    <!-- Datos de demo: Build Action = None y fuera del post-deploy, NO se publican. Se corren a mano (ver comentario del script). -->
+    <None Include="scripts\testdata\seed_demo.sql" />
     <None Include="scripts\sysdata\script_sysdata_t_estadoordentransporte.sql" />
     <None Include="Balanza.CILP.DataBase.publish.xml" />
   </ItemGroup>

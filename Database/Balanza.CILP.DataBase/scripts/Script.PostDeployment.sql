@@ -20,6 +20,7 @@ Post-Deployment Script Template
 :r .\initdata\script_initdata_t_rol.sql
 :r .\initdata\script_initdata_t_casodeuso.sql
 :r .\initdata\script_initdata_t_rolcasodeuso.sql
+:r .\initdata\script_initdata_t_puestoexpedicionrecepcion.sql
 -------------------------------------------------
 :r .\configuration\script_disabled_identity-cache.sql
 :r .\configuration\script_enabled_isolation-snapshot.sql

@@ -19,6 +19,7 @@ obj/
 [Oo]bj/
 /Backend/bin/
 /Backend/obj/
+/Backend/*.txt
 *.csproj.user
 *.pubxml
 project.lock.json

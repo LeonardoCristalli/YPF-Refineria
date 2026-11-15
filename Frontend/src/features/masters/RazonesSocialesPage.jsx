@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent from '../../api/agent';
+import agent, { getErrorMessage } from '../../api/agent';
 import RazonSocialForm from './RazonSocialForm';
 
 const RazonesSocialesPage = () => {
@@ -35,6 +35,7 @@ const RazonesSocialesPage = () => {
                 window.location.reload();
             } catch (error) {
                 console.error("Error deleting Razon Social", error);
+                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
             }
         }
     };

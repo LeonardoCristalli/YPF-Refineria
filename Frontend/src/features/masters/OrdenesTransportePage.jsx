@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent from '../../api/agent';
+import agent, { getErrorMessage } from '../../api/agent';
 import { Eye } from 'lucide-react';
 import OrdenDetailsModal from './OrdenDetailsModal';
 import OrdenTransporteForm from './OrdenTransporteForm';
@@ -34,7 +34,7 @@ const OrdenesTransportePage = () => {
                 window.location.reload();
             } catch (error) {
                 console.error("Error deleting order", error);
-                alert("Error al eliminar la orden");
+                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
             }
         }
     };

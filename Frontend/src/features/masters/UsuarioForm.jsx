@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
-import agent from '../../api/agent';
+import agent, { getErrorMessage } from '../../api/agent';
 
 const UsuarioForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
     const [loading, setLoading] = useState(false);
@@ -9,6 +9,7 @@ const UsuarioForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
         nombre: '',
         apellido: '',
         nroDocumento: '',
+        password: '',
         id_TipoDocumento: '1' // Defaulting to 1 for prototype
     });
 
@@ -20,6 +21,7 @@ const UsuarioForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                     nombre: initialValues.nombre || '',
                     apellido: initialValues.apellido || '',
                     nroDocumento: initialValues.nroDocumento || '',
+                    password: '',
                     id_TipoDocumento: initialValues.id_TipoDocumento || '1'
                 });
             } else {
@@ -28,6 +30,7 @@ const UsuarioForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                     nombre: '',
                     apellido: '',
                     nroDocumento: '',
+                    password: '',
                     id_TipoDocumento: '1'
                 });
             }
@@ -58,7 +61,7 @@ const UsuarioForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
             onClose();
         } catch (error) {
             console.error("Error saving Usuario", error);
-            alert("Error al guardar Usuario.");
+            alert(getErrorMessage(error, "Error al guardar Usuario."));
         } finally {
             setLoading(false);
         }
@@ -124,7 +127,22 @@ const UsuarioForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                                 value={formData.nroDocumento}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                maxLength={12}
                                 required
+                            />
+                        </div>
+
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
+                                placeholder={initialValues ? 'Dejar vacío para conservar la actual' : ''}
+                                autoComplete="new-password"
+                                required={!initialValues}
                             />
                         </div>
                     </div>

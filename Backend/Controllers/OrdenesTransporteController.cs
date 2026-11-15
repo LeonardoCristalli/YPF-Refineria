@@ -11,6 +11,12 @@ namespace Backend.Controllers
     {
         private readonly AppDbContext _context;
 
+        // Ids fijos cargados por los scripts sysdata del proyecto Database.
+        private const byte EstadoOrdenBorrador = 1;
+        private const byte TipoOrdenEntrega = 1;
+        private const byte UnidadKilos = 1;
+        private const byte UnidadLitros = 3;
+
         public OrdenesTransporteController(AppDbContext context)
         {
             _context = context;
@@ -52,8 +58,6 @@ namespace Backend.Controllers
                 if (transporte.OrdenDetalle?.Orden != null)
                 {
                     transporte.OrdenDetalle.Orden.FechaPlanificacion = dto.Fecha;
-                    transporte.OrdenDetalle.Orden.FechaInicioPlanificacion = dto.Fecha;
-                    // Update PuestoExpedicionRecepcion?
                 }
 
                 // 2. Update Detalle
@@ -61,6 +65,7 @@ namespace Backend.Controllers
                 {
                     transporte.OrdenDetalle.Id_Producto = dto.Id_Producto;
                     transporte.OrdenDetalle.Id_RazonSocialClienteProveedor = dto.Id_RazonSocialCliente;
+                    transporte.OrdenDetalle.NroRemito = dto.NroRemito;
                     transporte.OrdenDetalle.Peso = dto.Cantidad;
                 }
 
@@ -68,6 +73,7 @@ namespace Backend.Controllers
                 transporte.Id_Vehiculo = dto.Id_Vehiculo;
                 transporte.Id_Conductor = dto.Id_Conductor;
                 transporte.Id_RazonSocialTransportista = dto.Id_RazonSocialTransportista;
+                transporte.FechaPlanificacion = dto.Fecha;
 
                 // 4. Update Planificacion
                 var plan = await _context.Planificaciones.FirstOrDefaultAsync(p => p.Id_OrdenTransporte == id);
@@ -136,15 +142,28 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<ActionResult<OrdenTransporte>> Post(OrdenTransporteCreationDto dto)
         {
+            // Flujo provisorio: se rehace en la semana 2 con Autorización de Descarga y Orden de Entrega.
+            // Mientras tanto se completan las columnas obligatorias que el formulario no pide con
+            // valores por defecto, para que el alta no falle.
+            var idPuesto = await _context.Puestos
+                .Where(p => p.Activo)
+                .OrderBy(p => p.Id_PuestoExpedicionRecepcion)
+                .Select(p => (int?)p.Id_PuestoExpedicionRecepcion)
+                .FirstOrDefaultAsync();
+            if (idPuesto == null)
+            {
+                return BadRequest("No hay ningún Puesto de Expedición/Recepción activo. Publique la base de datos para cargar el puesto inicial.");
+            }
+
             using var transaction = _context.Database.BeginTransaction();
             try
             {
                 // 1. Create Orden
                 var orden = new Orden
                 {
-                    Id_EstadoOrden = 1, // Pendiente
-                    Id_TipoOrden = 1, // Recepcion by default for prototype
-                    FechaInicioPlanificacion = dto.Fecha,
+                    Id_EstadoOrden = EstadoOrdenBorrador,
+                    Id_TipoOrden = TipoOrdenEntrega,
+                    Id_PuestoExpedicionRecepcion = idPuesto.Value,
                     FechaPlanificacion = dto.Fecha
                 };
                 _context.Ordenes.Add(orden);
@@ -156,8 +175,12 @@ namespace Backend.Controllers
                     Id_Orden = orden.Id_Orden,
                     Id_Producto = dto.Id_Producto,
                     Id_RazonSocialClienteProveedor = dto.Id_RazonSocialCliente,
+                    NroRemito = dto.NroRemito,
                     Peso = dto.Cantidad, // Total Order weight
-                    Id_UnidadMedidaPeso = 1 // KG
+                    Id_UnidadMedidaPeso = UnidadKilos,
+                    Volumen = 0,
+                    Id_UnidadMedidaVolumen = UnidadLitros,
+                    EsMovimientoInterno = false
                 };
                 _context.OrdenDetalles.Add(detalle);
                 await _context.SaveChangesAsync();
@@ -168,7 +191,9 @@ namespace Backend.Controllers
                     Id_OrdenDetalle = detalle.Id_OrdenDetalle,
                     Id_Vehiculo = dto.Id_Vehiculo,
                     Id_Conductor = dto.Id_Conductor,
-                    Id_RazonSocialTransportista = dto.Id_RazonSocialTransportista
+                    Id_RazonSocialTransportista = dto.Id_RazonSocialTransportista,
+                    FechaPlanificacion = dto.Fecha
+                    // Id_EstadoOrdenTransporte = 1 (Planificacion) por defecto en el modelo
                 };
                 _context.OrdenTransportes.Add(transporte);
                 await _context.SaveChangesAsync();
@@ -177,7 +202,9 @@ namespace Backend.Controllers
                 var plan = new Planificacion
                 {
                     Id_OrdenTransporte = transporte.Id_OrdenTransporte,
+                    NroPosicion = 1,
                     CantidadPlanificada = dto.Cantidad,
+                    Id_UnidadMedidaCantidadPlanificada = UnidadKilos,
                     CantidadKG = dto.Cantidad
                 };
                 _context.Planificaciones.Add(plan);
@@ -202,6 +229,7 @@ namespace Backend.Controllers
         public int Id_RazonSocialTransportista { get; set; }
         public int Id_Vehiculo { get; set; }
         public int Id_Conductor { get; set; }
+        public long NroRemito { get; set; }
         public decimal Cantidad { get; set; }
         public DateTime Fecha { get; set; }
     }
