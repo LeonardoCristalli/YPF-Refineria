@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CrudTable from '../../common/CrudTable';
-import agent from '../../api/agent';
+import agent, { getErrorMessage } from '../../api/agent';
 import BasculaForm from './BasculaForm';
 
 const BasculasPage = () => {
@@ -35,6 +35,7 @@ const BasculasPage = () => {
                 window.location.reload();
             } catch (error) {
                 console.error("Error deleting Bascula", error);
+                alert(getErrorMessage(error, "No se pudo eliminar el registro."));
             }
         }
     };

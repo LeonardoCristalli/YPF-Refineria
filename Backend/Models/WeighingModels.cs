@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Models
 {
@@ -10,11 +11,21 @@ namespace Backend.Models
         public long Id_Pesada { get; set; }
         public long Id_Planificacion { get; set; }
         public byte Id_TipoPesada { get; set; }
-        public DateTime? Fecha { get; set; }
-        public decimal? Cantidad { get; set; }
-        public bool? EsIngresoManual { get; set; }
+
+        [Column("Fecha_Pesada")]
+        public DateTime Fecha { get; set; }
+
+        [Column("Cantidad_Pesada"), Precision(10, 2)]
+        public decimal Cantidad { get; set; }
+
+        [Column("EsIngresoManual_Pesada")]
+        public bool EsIngresoManual { get; set; }
+
+        [Column("MotivoIngresoManual_Pesada"), MaxLength(300)]
         public string? MotivoIngresoManual { get; set; }
-        public int? ID_Bascula { get; set; }
+
+        [Column("ID_Bascula")]
+        public int? Id_Bascula { get; set; }
 
         [ForeignKey("Id_Planificacion")]
         public virtual Planificacion? Planificacion { get; set; }
@@ -25,7 +36,9 @@ namespace Backend.Models
     {
         [Key]
         public byte Id_TipoPesada { get; set; }
-        public string? Descripcion { get; set; }
+
+        [Column("Descripcion_TipoPesada"), MaxLength(12), Required]
+        public string Descripcion { get; set; } = "";
     }
 
     [Table("t_Bascula")]
@@ -33,11 +46,26 @@ namespace Backend.Models
     {
         [Key]
         public int Id_Bascula { get; set; }
-        public string? Descripcion { get; set; }
-        public string? Lote { get; set; }
-        public string? Serie { get; set; }
-        public string? CertificadoHabilitado { get; set; }
-        public DateTime? VencimientoCertificado { get; set; }
-        public string? IP { get; set; }
+
+        [Column("Descripcion_Bascula"), MaxLength(50), Required]
+        public string Descripcion { get; set; } = "";
+
+        [Column("Lote_Bascula"), MaxLength(20), Required]
+        public string Lote { get; set; } = "";
+
+        [Column("Serie_Bascula"), MaxLength(20), Required]
+        public string Serie { get; set; } = "";
+
+        [Column("CertificadoHabilitado_Bascula"), MaxLength(20), Required]
+        public string CertificadoHabilitado { get; set; } = "";
+
+        [Column("VencimientoCertificado_Bascula", TypeName = "date")]
+        public DateTime VencimientoCertificado { get; set; }
+
+        [Column("IP_Bascula"), MaxLength(19), Required]
+        public string IP { get; set; } = "";
+
+        [Column("Activo_Bascula")]
+        public bool Activo { get; set; } = true;
     }
 }

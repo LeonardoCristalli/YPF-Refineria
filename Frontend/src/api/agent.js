@@ -48,3 +48,13 @@ export default {
     Planificaciones,
     Pesadas,
 };
+
+// Devuelve el mensaje de error que manda el backend (ProblemDetails.detail, texto plano
+// o errores de validación); si no hay, usa el texto por defecto.
+export const getErrorMessage = (error, fallback) => {
+    const data = error?.response?.data;
+    if (typeof data === 'string' && data) return data;
+    if (data?.detail) return data.detail;
+    if (data?.errors) return Object.values(data.errors).flat().join('\n');
+    return fallback;
+};

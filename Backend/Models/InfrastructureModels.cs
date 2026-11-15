@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Models
 {
@@ -8,9 +9,21 @@ namespace Backend.Models
     {
         [Key]
         public int Id_Tanque { get; set; }
-        public string? Descripcion { get; set; }
-        public decimal? VolumenMaximo { get; set; }
-        public decimal? VolumenOcupado { get; set; }
+
+        [Column("Codigo_Tanque"), MaxLength(20), Required]
+        public string Codigo { get; set; } = "";
+
+        [Column("Descripcion_Tanque"), MaxLength(50), Required]
+        public string Descripcion { get; set; } = "";
+
+        [Column("VolumenMaximo_Tanque"), Precision(10, 2)]
+        public decimal VolumenMaximo { get; set; }
+
+        [Column("VolumenOcupado_Tanque"), Precision(10, 2)]
+        public decimal VolumenOcupado { get; set; }
+
+        [Column("Activo_Tanque")]
+        public bool Activo { get; set; } = true;
     }
 
     [Table("t_TanqueAlmacenamiento")]
@@ -20,7 +33,12 @@ namespace Backend.Models
         public int Id_TanqueAlmacenamiento { get; set; }
         public long Id_OrdenDetalle { get; set; }
         public int Id_Tanque { get; set; }
-        public decimal? Volumen { get; set; }
+
+        [Column("Volumen_TanqueAlmacenamiento"), Precision(10, 2)]
+        public decimal Volumen { get; set; }
+
+        [Column("Activo_TanqueAlmacenamiento")]
+        public bool Activo { get; set; } = true;
     }
 
     [Table("t_DispositivoDetector")]
@@ -28,19 +46,14 @@ namespace Backend.Models
     {
         [Key]
         public int Id_DispositivoDetector { get; set; }
-        public string? Descripcion { get; set; }
-        public string? IP { get; set; }
-    }
 
-    [Table("t_RazonSocialTipoCliente")]
-    public class RazonSocialTipoCliente
-    {
-        // For now, I'll use Id_ClienteProveedor as Key.
-        [Key]
-        public int Id_ClienteProveedor { get; set; }
-        public int Id_RazonSocial { get; set; }
-        public bool? EsProveedor { get; set; }
-        public bool? EsCliente { get; set; }
-        public bool? EsTransportista { get; set; }
+        [Column("Descripcion_DispositivoDetector"), MaxLength(30), Required]
+        public string Descripcion { get; set; } = "";
+
+        [Column("IP_DispositivoDetector"), MaxLength(19), Required]
+        public string IP { get; set; } = "";
+
+        [Column("Activo_DispositivoDetector")]
+        public bool Activo { get; set; } = true;
     }
 }

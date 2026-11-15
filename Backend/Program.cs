@@ -1,17 +1,23 @@
 using Backend.Data;
-using Backend.Models;
+using Backend.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 30))));
+// La connection string vive en user-secrets (dotnet user-secrets set "ConnectionStrings:DefaultConnection" "...")
+// o en appsettings.Development.json; nunca en appsettings.json.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Falta ConnectionStrings:DefaultConnection. Configurala con: " +
+        "dotnet user-secrets set \"ConnectionStrings:DefaultConnection\" " +
+        "\"Server=.\\SQLEXPRESS;Database=BalanzaCILP;Trusted_Connection=True;TrustServerCertificate=True\"");
+
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ForeignKeyConflictHandler>();
 
 builder.Services.AddCors(options =>
 {
@@ -26,27 +32,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Ensure Database is Created and Seeded
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<AppDbContext>();
-        DbInitializer.Initialize(context); // Seeding enabled for prototype
-        
-        if (context.Database.EnsureCreated())
-        {
-             Console.WriteLine("SUCCESS: Database schema ensured.");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"ERROR: Could not ensure database created: {ex.Message}");
-    }
-}
+// El esquema y los datos de sistema los crea la publicación del proyecto Database (ver CLAUDE.md).
+app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
