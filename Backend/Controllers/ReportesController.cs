@@ -147,5 +147,212 @@ namespace Backend.Controllers
                 tonelajeTotal = Math.Round(kgTotal / 1000, 2)
             });
         }
+
+        // CU080: Movimientos por período (especificación oficial: órdenes ejecutadas filtradas por FechaFinEjecucion y tipo de movimiento).
+        [HttpGet("movimientos-por-periodo")]
+        public async Task<ActionResult> GetMovimientosPorPeriodo(
+            [FromQuery] DateTime? desde,
+            [FromQuery] DateTime? hasta,
+            [FromQuery] byte? idTipoOrden = null,
+            [FromQuery] bool? replanificado = null)
+        {
+            // CU080-RF01: el rango Desde / Hasta de Fecha Fin de Ejecución es obligatorio
+            if (!desde.HasValue || !hasta.HasValue)
+                return BadRequest("Las fechas Desde y Hasta son obligatorias.");
+
+            // CU080-RN02: Desde debe ser menor o igual a Hasta
+            if (desde.Value.Date > hasta.Value.Date)
+                return BadRequest("La fecha Desde debe ser menor o igual a la fecha Hasta.");
+
+            var desdeEfectivo = desde ?? DateTime.Today.AddMonths(-1);
+            var hastaEfectivo = hasta?.Date.AddDays(1) ?? DateTime.Today.AddDays(1);
+
+            var query = _context.OrdenTransportes
+                .AsNoTracking()
+                .Where(ot => ot.Activo
+                    && ot.Id_EstadoOrdenTransporte == 5   // CU080-RN01: solo órdenes en estado Ejecutado (t_EstadoOrdenTransporte)
+                    && ot.FechaFinEjecucion != null
+                    && ot.FechaFinEjecucion >= desdeEfectivo
+                    && ot.FechaFinEjecucion < hastaEfectivo);
+
+            // CU080-RF02 / RF04: filtro opcional "Replanificado" (vacío = todas, Sí, No)
+            if (replanificado.HasValue)
+            {
+                if (replanificado.Value)
+                    query = query.Where(ot => ot.FechaFinReplanificacion != null || ot.MotivoReplanificacion != null);
+                else
+                    query = query.Where(ot => ot.FechaFinReplanificacion == null && ot.MotivoReplanificacion == null);
+            }
+
+            if (idTipoOrden.HasValue && idTipoOrden.Value > 0)
+            {
+                query = query.Where(ot => ot.OrdenDetalle != null
+                    && ot.OrdenDetalle.Orden != null
+                    && ot.OrdenDetalle.Orden.Id_TipoOrden == idTipoOrden.Value);
+            }
+
+            var ots = await query
+                .Select(ot => new
+                {
+                    ot.Id_OrdenTransporte,
+                    ot.FechaPlanificacion,
+                    ot.FechaInicioEjecucion,
+                    FechaFinEjecucion = ot.FechaFinEjecucion!.Value,
+                    IdTipoOrden = ot.OrdenDetalle != null && ot.OrdenDetalle.Orden != null
+                        ? ot.OrdenDetalle.Orden.Id_TipoOrden : (byte)1,
+                    TipoOrden = ot.OrdenDetalle != null && ot.OrdenDetalle.Orden != null
+                        ? (ot.OrdenDetalle.Orden.Id_TipoOrden == 2 ? "Autorización de Descarga" : "Orden de Entrega")
+                        : "Orden de Entrega",
+                    ot.Id_EstadoOrdenTransporte,
+                    Estado = ot.EstadoOrdenTransporte != null ? ot.EstadoOrdenTransporte.Descripcion : "Ejecutado",
+                    Producto = ot.OrdenDetalle != null && ot.OrdenDetalle.Producto != null
+                        ? ot.OrdenDetalle.Producto.Descripcion : "N/A",
+                    CantidadPlanificada = ot.OrdenDetalle != null
+                        ? (decimal?)ot.OrdenDetalle.Peso : null,
+                    Transportista = ot.RazonSocialTransportista != null
+                        ? ot.RazonSocialTransportista.Descripcion : "N/A",
+                    Vehiculo = ot.Vehiculo != null ? ot.Vehiculo.PatenteChasis : "N/A",
+                    Pesadas = _context.Pesadas
+                        .Where(p => p.Planificacion != null && p.Planificacion.Id_OrdenTransporte == ot.Id_OrdenTransporte)
+                        .OrderBy(p => p.Id_TipoPesada)
+                        .Select(p => new { p.Id_TipoPesada, p.Cantidad })
+                        .ToList()
+                })
+                .ToListAsync();
+
+            var registros = ots.Select(ot =>
+            {
+                var tara = ot.Pesadas.FirstOrDefault(p => p.Id_TipoPesada == 1)?.Cantidad;
+                var bruto = ot.Pesadas.FirstOrDefault(p => p.Id_TipoPesada == 2)?.Cantidad;
+                var neto = tara.HasValue && bruto.HasValue ? Math.Abs(bruto.Value - tara.Value) : (decimal?)null;
+
+                return new MovimientoPeriodoDto
+                {
+                    IdOT = ot.Id_OrdenTransporte,
+                    Fecha = ot.FechaFinEjecucion,
+                    FechaPlanificacion = ot.FechaPlanificacion,
+                    IdTipoOrden = ot.IdTipoOrden,
+                    TipoOrden = ot.TipoOrden,
+                    Producto = ot.Producto,
+                    Transportista = ot.Transportista,
+                    Vehiculo = ot.Vehiculo,
+                    CantidadPlanificada = ot.CantidadPlanificada,
+                    PesoTara = tara,
+                    PesoBruto = bruto,
+                    PesoNeto = neto,
+                    Estado = ot.Estado
+                };
+            }).OrderBy(r => r.Fecha).ThenBy(r => r.IdOT).ToList();
+
+            var totalOTs = registros.Count;
+            var totalKgNeto = registros.Where(r => r.PesoNeto.HasValue).Sum(r => r.PesoNeto!.Value);
+            var diasEnPeriodo = Math.Max(1, (hastaEfectivo.Date - desdeEfectivo.Date).TotalDays);
+            var promedioDiario = Math.Round((double)totalKgNeto / diasEnPeriodo, 2);
+
+            return Ok(new
+            {
+                registros,
+                resumen = new
+                {
+                    totalOTs,
+                    totalKgNeto = Math.Round(totalKgNeto, 2),
+                    promedioDiario,
+                    desde = desdeEfectivo.Date,
+                    hasta = hastaEfectivo.Date.AddDays(-1)
+                }
+            });
+        }
+
+        // CU081: Movimientos agrupados por producto.
+        // Mismo filtro de período; retorna un registro por producto ordenado por totalKgNeto desc.
+        [HttpGet("movimientos-por-producto")]
+        public async Task<ActionResult> GetMovimientosPorProducto(
+            [FromQuery] DateTime? desde,
+            [FromQuery] DateTime? hasta)
+        {
+            var desdeEfectivo = desde ?? DateTime.Today.AddMonths(-1);
+            var hastaEfectivo = hasta?.Date.AddDays(1) ?? DateTime.Today.AddDays(1);
+
+            var ots = await _context.OrdenTransportes
+                .AsNoTracking()
+                .Where(ot => ot.Activo
+                    && ot.FechaFinEjecucion != null
+                    && ot.FechaFinEjecucion >= desdeEfectivo
+                    && ot.FechaFinEjecucion < hastaEfectivo)
+                .Select(ot => new
+                {
+                    IdProducto = ot.OrdenDetalle != null ? (int?)ot.OrdenDetalle.Id_Producto : null,
+                    Producto = ot.OrdenDetalle != null && ot.OrdenDetalle.Producto != null
+                        ? ot.OrdenDetalle.Producto.Descripcion : "N/A",
+                    CantidadPlanificada = ot.OrdenDetalle != null ? (decimal?)ot.OrdenDetalle.Peso : null,
+                    Pesadas = _context.Pesadas
+                        .Where(p => p.Planificacion != null && p.Planificacion.Id_OrdenTransporte == ot.Id_OrdenTransporte)
+                        .OrderBy(p => p.Id_TipoPesada)
+                        .Select(p => new { p.Id_TipoPesada, p.Cantidad })
+                        .ToList()
+                })
+                .ToListAsync();
+
+            var agrupado = ots
+                .GroupBy(ot => new { ot.IdProducto, ot.Producto })
+                .Select(g =>
+                {
+                    var cantidadOTs = g.Count();
+                    var totalKgPlanificado = g.Sum(ot => ot.CantidadPlanificada ?? 0);
+                    var kgsNeto = g.Select(ot =>
+                    {
+                        var tara = ot.Pesadas.FirstOrDefault(p => p.Id_TipoPesada == 1)?.Cantidad;
+                        var bruto = ot.Pesadas.FirstOrDefault(p => p.Id_TipoPesada == 2)?.Cantidad;
+                        return tara.HasValue && bruto.HasValue ? Math.Abs(bruto.Value - tara.Value) : (decimal?)null;
+                    }).Where(n => n.HasValue).Select(n => n!.Value).ToList();
+
+                    var totalKgNeto = kgsNeto.Sum();
+                    var promedioPorOT = cantidadOTs > 0 && kgsNeto.Count > 0
+                        ? Math.Round((double)totalKgNeto / cantidadOTs, 2) : 0;
+
+                    return new MovimientoProductoDto
+                    {
+                        IdProducto = g.Key.IdProducto,
+                        Descripcion = g.Key.Producto,
+                        CantidadOTs = cantidadOTs,
+                        TotalKgPlanificado = Math.Round(totalKgPlanificado, 2),
+                        TotalKgNeto = Math.Round(totalKgNeto, 2),
+                        PromedioPorOT = (decimal)promedioPorOT
+                    };
+                })
+                .OrderByDescending(x => x.TotalKgNeto)
+                .ToList();
+
+            return Ok(agrupado);
+        }
+
+        // ─── DTOs ───────────────────────────────────────────────────────────────
+
+        public class MovimientoPeriodoDto
+        {
+            public long IdOT { get; set; }
+            public DateTime Fecha { get; set; }
+            public DateTime? FechaPlanificacion { get; set; }
+            public byte IdTipoOrden { get; set; }
+            public string TipoOrden { get; set; } = "";
+            public string Producto { get; set; } = "";
+            public string Transportista { get; set; } = "";
+            public string Vehiculo { get; set; } = "";
+            public decimal? CantidadPlanificada { get; set; }
+            public decimal? PesoTara { get; set; }
+            public decimal? PesoBruto { get; set; }
+            public decimal? PesoNeto { get; set; }
+            public string Estado { get; set; } = "";
+        }
+
+        public class MovimientoProductoDto
+        {
+            public int? IdProducto { get; set; }
+            public string Descripcion { get; set; } = "";
+            public int CantidadOTs { get; set; }
+            public decimal TotalKgPlanificado { get; set; }
+            public decimal TotalKgNeto { get; set; }
+            public decimal PromedioPorOT { get; set; }
+        }
     }
 }

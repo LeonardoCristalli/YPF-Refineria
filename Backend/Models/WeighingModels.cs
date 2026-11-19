@@ -62,7 +62,8 @@ namespace Backend.Models
         [Column("VencimientoCertificado_Bascula", TypeName = "date")]
         public DateTime VencimientoCertificado { get; set; }
 
-        [Column("IP_Bascula"), MaxLength(19), Required]
+        [Column("IP_Bascula"), MaxLength(19), Required(ErrorMessage = "La dirección IP es requerida.")]
+        [RegularExpression(@"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", ErrorMessage = "La dirección IP debe tener un formato IPv4 válido.")]
         public string IP { get; set; } = "";
 
         [Column("Activo_Bascula")]

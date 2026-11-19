@@ -81,15 +81,15 @@ namespace Backend.Models
         public string PatenteAcoplado { get; set; } = "";
 
         [Column("PesoSinCargar_Vehiculo"), Precision(10, 2)]
-        [Range(0, 100000.0, ErrorMessage = "El peso sin carga debe estar entre 0 y 100.000 kg.")]
+        [Range(0.01, 100000.0, ErrorMessage = "El peso sin carga debe ser mayor que cero y hasta 100.000 kg.")]
         public decimal PesoSinCargas { get; set; }
 
         [Column("PesoMaximo_Vehiculo"), Precision(10, 2)]
-        [Range(0, 100000.0, ErrorMessage = "El peso máximo debe estar entre 0 y 100.000 kg.")]
+        [Range(0.01, 100000.0, ErrorMessage = "El peso máximo debe ser mayor que cero y hasta 100.000 kg.")]
         public decimal PesoMaximo { get; set; }
 
         [Column("VolumenMaximo_Vehiculo"), Precision(10, 2)]
-        [Range(0, 100000.0, ErrorMessage = "El volumen máximo debe estar entre 0 y 100.000 L.")]
+        [Range(0.01, 100000.0, ErrorMessage = "El volumen máximo debe ser mayor que cero y hasta 100.000 L.")]
         public decimal VolumenMaximo { get; set; }
 
         [Column("Activo_Vehiculo")]
