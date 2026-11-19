@@ -14,6 +14,7 @@ namespace Backend.Controllers
         // Ids fijos cargados por los scripts sysdata del proyecto Database.
         private const byte EstadoOrdenBorrador = 1;
         private const byte TipoOrdenEntrega = 1;
+        private const byte TipoOrdenDescarga = 2;   // t_TipoOrden: 1 = Orden de Entrega, 2 = Autorización de Descarga
         private const byte UnidadKilos = 1;
         private const byte UnidadLitros = 3;
 
@@ -27,10 +28,29 @@ namespace Backend.Controllers
         {
             return await _context.OrdenTransportes
                 .Include(ot => ot.OrdenDetalle).ThenInclude(od => od.Producto)
+                .Include(ot => ot.OrdenDetalle).ThenInclude(od => od.Orden)
                 .Include(ot => ot.Vehiculo)
                 .Include(ot => ot.Conductor)
                 .Include(ot => ot.RazonSocialTransportista)
                 .ToListAsync();
+        }
+
+        [HttpGet("ByPatente/{patente}")]
+        public async Task<ActionResult<OrdenTransporte>> GetByPatente(string patente)
+        {
+            var item = await _context.OrdenTransportes
+                .Include(ot => ot.OrdenDetalle).ThenInclude(od => od.Producto)
+                .Include(ot => ot.OrdenDetalle).ThenInclude(od => od.Orden)
+                .Include(ot => ot.Vehiculo)
+                .Include(ot => ot.Conductor)
+                .Include(ot => ot.RazonSocialTransportista)
+                .Where(ot => ot.Activo && ot.Vehiculo != null && ot.Vehiculo.PatenteChasis.ToUpper() == patente.ToUpper())
+                .FirstOrDefaultAsync();
+
+            if (item == null)
+                return NotFound(new { message = "No se encontró ninguna orden activa para la patente indicada." });
+
+            return item;
         }
 
         [HttpGet("{id}")]
@@ -95,6 +115,59 @@ namespace Backend.Controllers
             }
         }
 
+        // Libera el volumen reservado en el tanque cuando una descarga abierta se cancela o elimina.
+        // No hace nada si la orden ya está cerrada o cancelada (el volumen ya fue consumido o liberado).
+        private async Task LiberarTanqueAsync(OrdenDetalle? detalle)
+        {
+            if (detalle?.Orden == null || !detalle.Orden.Activo || detalle.Orden.Id_TipoOrden != TipoOrdenDescarga)
+                return;
+
+            var vinculos = await _context.TanqueAlmacenamientos
+                .Where(ta => ta.Id_OrdenDetalle == detalle.Id_OrdenDetalle)
+                .ToListAsync();
+
+            foreach (var vinculo in vinculos)
+            {
+                var tanque = await _context.Tanques.FindAsync(vinculo.Id_Tanque);
+                if (tanque != null)
+                {
+                    tanque.VolumenOcupado = Math.Max(0, tanque.VolumenOcupado - vinculo.Volumen);
+                }
+            }
+        }
+
+        [HttpPatch("{id}/cancelar")]
+        public async Task<IActionResult> Cancelar(long id, [FromBody] CancelarOrdenDto dto)
+        {
+            var transporte = await _context.OrdenTransportes
+                .Include(t => t.OrdenDetalle)
+                .ThenInclude(d => d.Orden)
+                .FirstOrDefaultAsync(t => t.Id_OrdenTransporte == id);
+
+            if (transporte == null) return NotFound();
+
+            if (transporte.Activo == false)
+                return BadRequest("La orden ya está cancelada.");
+
+            if (transporte.OrdenDetalle?.Orden?.FechaCierre != null)
+                return BadRequest("La orden ya fue cerrada con sus pesadas y no puede cancelarse.");
+
+            await LiberarTanqueAsync(transporte.OrdenDetalle);
+
+            if (transporte.OrdenDetalle?.Orden != null)
+            {
+                transporte.OrdenDetalle.Orden.Activo = false;
+                transporte.OrdenDetalle.Orden.FechaAnulacion = DateTime.Now;
+                transporte.OrdenDetalle.Orden.MotivoAnulacion = dto.Motivo;
+            }
+
+            transporte.Activo = false;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Orden cancelada." });
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
@@ -107,6 +180,16 @@ namespace Backend.Controllers
                     .FirstOrDefaultAsync(t => t.Id_OrdenTransporte == id);
 
                 if (transporte == null) return NotFound();
+
+                // 0. Liberar y eliminar el vínculo con el tanque (si no, la baja falla por clave foránea)
+                if (transporte.OrdenDetalle != null)
+                {
+                    await LiberarTanqueAsync(transporte.OrdenDetalle);
+                    var vinculosTanque = await _context.TanqueAlmacenamientos
+                        .Where(ta => ta.Id_OrdenDetalle == transporte.OrdenDetalle.Id_OrdenDetalle)
+                        .ToListAsync();
+                    _context.TanqueAlmacenamientos.RemoveRange(vinculosTanque);
+                }
 
                 // 1. Delete Planificacion
                 var plan = await _context.Planificaciones.FirstOrDefaultAsync(p => p.Id_OrdenTransporte == id);
@@ -162,7 +245,7 @@ namespace Backend.Controllers
                 var orden = new Orden
                 {
                     Id_EstadoOrden = EstadoOrdenBorrador,
-                    Id_TipoOrden = TipoOrdenEntrega,
+                    Id_TipoOrden = dto.Id_TipoOrden > 0 ? dto.Id_TipoOrden : TipoOrdenEntrega,
                     Id_PuestoExpedicionRecepcion = idPuesto.Value,
                     FechaPlanificacion = dto.Fecha
                 };
@@ -210,6 +293,55 @@ namespace Backend.Controllers
                 _context.Planificaciones.Add(plan);
                 await _context.SaveChangesAsync();
 
+                // 5. Vincular Tanque de Almacenamiento si fue seleccionado (CU061)
+                // La capacidad del tanque está en litros y la cantidad de la orden en kilos:
+                // se convierte con la densidad del producto (kg/L).
+                if (dto.Id_Tanque.HasValue && dto.Id_Tanque.Value > 0)
+                {
+                    var tanque = await _context.Tanques.FindAsync(dto.Id_Tanque.Value);
+                    if (tanque == null || !tanque.Activo)
+                    {
+                        await transaction.RollbackAsync();
+                        return BadRequest("El tanque seleccionado no existe o no está activo.");
+                    }
+
+                    var producto = await _context.Productos.FindAsync(dto.Id_Producto);
+                    if (producto == null || producto.Densidad <= 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return BadRequest("El producto no tiene una densidad válida para calcular el volumen.");
+                    }
+
+                    var volumenLitros = Math.Round(dto.Cantidad / producto.Densidad, 2);
+                    var esDescarga = orden.Id_TipoOrden == TipoOrdenDescarga;
+
+                    // Validación de capacidad: solo aplica a la recepción (descarga) en el tanque de destino.
+                    if (esDescarga)
+                    {
+                        var disponible = tanque.VolumenMaximo - tanque.VolumenOcupado;
+                        if (volumenLitros > disponible)
+                        {
+                            await transaction.RollbackAsync();
+                            return BadRequest($"Capacidad insuficiente en el tanque {tanque.Codigo}: disponible {disponible:N2} L, requerido {volumenLitros:N2} L ({dto.Cantidad:N2} kg).");
+                        }
+                    }
+
+                    _context.TanqueAlmacenamientos.Add(new TanqueAlmacenamiento
+                    {
+                        Id_OrdenDetalle = detalle.Id_OrdenDetalle,
+                        Id_Tanque = dto.Id_Tanque.Value,
+                        Volumen = volumenLitros,
+                        Activo = true
+                    });
+
+                    // Una descarga reserva volumen en el tanque de destino.
+                    if (esDescarga)
+                    {
+                        tanque.VolumenOcupado += volumenLitros;
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
                 await transaction.CommitAsync();
 
                 return CreatedAtAction(nameof(Get), new { id = transporte.Id_OrdenTransporte }, transporte);
@@ -222,6 +354,11 @@ namespace Backend.Controllers
         }
     }
 
+    public class CancelarOrdenDto
+    {
+        public string Motivo { get; set; } = string.Empty;
+    }
+
     public class OrdenTransporteCreationDto
     {
         public int Id_Producto { get; set; }
@@ -232,5 +369,7 @@ namespace Backend.Controllers
         public long NroRemito { get; set; }
         public decimal Cantidad { get; set; }
         public DateTime Fecha { get; set; }
+        public byte Id_TipoOrden { get; set; }
+        public int? Id_Tanque { get; set; }
     }
 }

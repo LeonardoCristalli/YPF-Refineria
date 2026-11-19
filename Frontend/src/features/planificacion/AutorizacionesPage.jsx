@@ -1,17 +1,107 @@
 import React, { useState, useEffect } from 'react';
 import {
     Plus, Search, FileText, Filter, Calendar, ChevronDown,
-    CheckCircle2, X, Save, Loader2, AlertCircle, Clock
+    CheckCircle2, X, Save, Loader2, AlertCircle, Clock,
+    Eye, Pencil, Trash2, Ban, Database
 } from 'lucide-react';
 import agent, { getErrorMessage } from '../../api/agent';
 
-// ─────────── Modal Nueva Autorización / Entrega ───────────
+// ─────────── Modal Cancelar Orden (CU064 / CU070) ───────────
+const CancelarOrdenModal = ({ isOpen, onClose, onSuccess, orden }) => {
+    const [motivo, setMotivo] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) setMotivo('');
+    }, [isOpen]);
+
+    if (!isOpen || !orden) return null;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!motivo.trim()) {
+            alert('Debe ingresar un motivo de cancelación.');
+            return;
+        }
+        setLoading(true);
+        try {
+            await agent.OrdenesTransporte.cancelar(orden.id_OrdenTransporte, motivo.trim());
+            onSuccess();
+            onClose();
+        } catch (err) {
+            console.error(err);
+            alert(getErrorMessage(err, 'Error al cancelar la orden.'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
+                <div className="px-6 py-5 flex justify-between items-center rounded-t-2xl bg-linear-to-r from-red-700 to-red-600">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white/10 rounded-xl">
+                            <Ban size={20} className="text-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Cancelar Orden</h3>
+                            <p className="text-xs text-white/70">OT-{orden.id_OrdenTransporte} · {orden.ordenDetalle?.producto?.descripcion || 'Material'}</p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="text-white/70 hover:text-white">
+                        <X size={22} />
+                    </button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                            Motivo de Cancelación / Anulación *
+                        </label>
+                        <textarea
+                            value={motivo}
+                            onChange={(e) => setMotivo(e.target.value)}
+                            rows={3}
+                            placeholder="Ingrese el motivo de cancelación..."
+                            className="w-full p-2.5 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-red-500/20 focus:border-red-400 outline-none resize-none"
+                            required
+                        />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                        >
+                            Volver
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 py-2.5 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 transition-colors shadow-lg shadow-red-500/20 flex items-center justify-center gap-2"
+                        >
+                            {loading ? <Loader2 size={16} className="animate-spin" /> : <Ban size={16} />}
+                            {loading ? 'Cancelando...' : 'Confirmar Cancelación'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// Valores de t_TipoOrden en la base de datos: 1 = Orden de Entrega, 2 = Autorización de Descarga.
+const TIPO_ENTREGA = 1;
+const TIPO_DESCARGA = 2;
+
+// ─────────── Modal Nueva Autorización / Entrega (CU061 / CU067) ───────────
 const NuevaOrdenModal = ({ isOpen, onClose, onSuccess, tipoOrden }) => {
     const [productos, setProductos] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [transportistas, setTransportistas] = useState([]);
     const [vehiculos, setVehiculos] = useState([]);
     const [conductores, setConductores] = useState([]);
+    const [tanques, setTanques] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingOpts, setLoadingOpts] = useState(true);
 
@@ -23,6 +113,7 @@ const NuevaOrdenModal = ({ isOpen, onClose, onSuccess, tipoOrden }) => {
         id_Conductor: '',
         nroRemito: '',
         cantidad: '',
+        id_Tanque: '',
         fecha: new Date().toISOString().split('T')[0],
     });
 
@@ -31,7 +122,7 @@ const NuevaOrdenModal = ({ isOpen, onClose, onSuccess, tipoOrden }) => {
             setLoadingOpts(true);
             setFormData({
                 id_Producto: '', id_RazonSocialCliente: '', id_RazonSocialTransportista: '',
-                id_Vehiculo: '', id_Conductor: '', nroRemito: '', cantidad: '',
+                id_Vehiculo: '', id_Conductor: '', nroRemito: '', cantidad: '', id_Tanque: '',
                 fecha: new Date().toISOString().split('T')[0],
             });
             Promise.all([
@@ -39,12 +130,14 @@ const NuevaOrdenModal = ({ isOpen, onClose, onSuccess, tipoOrden }) => {
                 agent.RazonesSociales.list(),
                 agent.Vehiculos.list(),
                 agent.Conductores.list(),
-            ]).then(([prods, razons, vehs, conds]) => {
+                agent.Tanques.list().catch(() => []),
+            ]).then(([prods, razons, vehs, conds, tanks]) => {
                 setProductos(prods);
                 setClientes(razons);
                 setTransportistas(razons.filter(r => r.esTransportista));
                 setVehiculos(vehs);
                 setConductores(conds);
+                setTanques(Array.isArray(tanks) ? tanks : []);
             }).catch(console.error).finally(() => setLoadingOpts(false));
         }
     }, [isOpen]);
@@ -56,8 +149,23 @@ const NuevaOrdenModal = ({ isOpen, onClose, onSuccess, tipoOrden }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const selectedTanque = tanques.find(t => String(t.id_Tanque) === String(formData.id_Tanque));
+    // La capacidad del tanque está en litros y la cantidad se ingresa en kg:
+    // se convierte con la densidad del producto (kg/L). Solo aplica a las descargas.
+    const selectedProducto = productos.find(p => String(p.id_Producto) === String(formData.id_Producto));
+    const cantidadLitros = selectedProducto?.densidad > 0 && formData.cantidad
+        ? parseFloat(formData.cantidad) / selectedProducto.densidad
+        : null;
+    const capacidadExcedida = tipoOrden === 'descarga' && selectedTanque && cantidadLitros != null &&
+        cantidadLitros > selectedTanque.capacidadDisponible;
+
     const handleSubmit = async e => {
         e.preventDefault();
+        if (capacidadExcedida) {
+            alert(`Capacidad insuficiente en el tanque seleccionado (${selectedTanque.capacidadDisponible.toLocaleString('es-AR')} L disponibles; la carga requiere ${Math.round(cantidadLitros).toLocaleString('es-AR')} L).`);
+            return;
+        }
+
         setLoading(true);
         try {
             const payload = {
@@ -69,6 +177,8 @@ const NuevaOrdenModal = ({ isOpen, onClose, onSuccess, tipoOrden }) => {
                 nroRemito: parseInt(formData.nroRemito),
                 cantidad: parseFloat(formData.cantidad),
                 fecha: new Date(formData.fecha).toISOString(),
+                id_TipoOrden: tipoOrden === 'descarga' ? TIPO_DESCARGA : TIPO_ENTREGA,
+                id_Tanque: formData.id_Tanque ? parseInt(formData.id_Tanque) : null,
             };
             await agent.OrdenesTransporte.create(payload);
             onSuccess();
@@ -133,7 +243,7 @@ const NuevaOrdenModal = ({ isOpen, onClose, onSuccess, tipoOrden }) => {
                         </div>
                     </div>
 
-                    {/* Remito (t_OrdenDetalle.NroRemito_OrdenDetalle, NOT NULL) */}
+                    {/* Remito */}
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nro. de Remito</label>
                         <input
@@ -165,6 +275,33 @@ const NuevaOrdenModal = ({ isOpen, onClose, onSuccess, tipoOrden }) => {
                                 <option key={p.id_Producto} value={p.id_Producto}>{p.descripcion}</option>
                             ))}
                         </select>
+                    </div>
+
+                    {/* Tanque de Almacenamiento (CU061) */}
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                            <Database size={13} className="inline mr-1" />
+                            {esDescarga ? 'Tanque de Destino (Almacenamiento) *' : 'Tanque de Origen (Opcional)'}
+                        </label>
+                        <select
+                            name="id_Tanque"
+                            value={formData.id_Tanque}
+                            onChange={handleChange}
+                            className={`w-full p-2.5 border rounded-xl bg-white text-sm font-medium focus:ring-2 outline-none ${capacidadExcedida ? 'border-red-400 focus:ring-red-500/20' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-400'}`}
+                            disabled={loadingOpts}
+                        >
+                            <option value="">Seleccione Tanque...</option>
+                            {tanques.map(t => (
+                                <option key={t.id_Tanque} value={t.id_Tanque}>
+                                    {t.codigo} — {t.descripcion} (Disp: {Number(t.capacidadDisponible).toLocaleString('es-AR')} L / Max: {Number(t.volumenMaximo).toLocaleString('es-AR')} L)
+                                </option>
+                            ))}
+                        </select>
+                        {capacidadExcedida && (
+                            <p className="text-xs text-red-600 font-semibold mt-1 flex items-center gap-1">
+                                <AlertCircle size={12} /> Capacidad insuficiente en tanque ({selectedTanque.capacidadDisponible.toLocaleString('es-AR')} L disponibles vs {parseFloat(formData.cantidad).toLocaleString('es-AR')} KG)
+                            </p>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -259,11 +396,359 @@ const NuevaOrdenModal = ({ isOpen, onClose, onSuccess, tipoOrden }) => {
                         </button>
                         <button
                             type="submit"
+                            disabled={loading || loadingOpts || capacidadExcedida}
+                            className={`flex-1 py-2.5 rounded-xl text-white font-bold text-sm transition-colors flex items-center justify-center gap-2 ${esDescarga ? 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20'} ${capacidadExcedida ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                            {loading ? 'Guardando...' : `Crear ${esDescarga ? 'Autorización' : 'Entrega'}`}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// ─────────── Modal Ver Detalle (CU062 / CU068) ───────────
+const DetalleOrdenModal = ({ isOpen, onClose, orden }) => {
+    if (!isOpen || !orden) return null;
+
+    const tipoOrden = orden.ordenDetalle?.orden?.id_TipoOrden;
+    const esDescarga = tipoOrden === TIPO_DESCARGA;
+
+    const Campo = ({ label, value }) => (
+        <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
+            <p className="text-sm font-semibold text-slate-700">{value || '—'}</p>
+        </div>
+    );
+
+    const ordenObj = orden.ordenDetalle?.orden;
+    let estadoTexto = "Planificada";
+    if (ordenObj && ordenObj.activo === false && ordenObj.fechaAnulacion) {
+        estadoTexto = `Cancelada (${ordenObj.motivoAnulacion || 'Sin motivo especificado'})`;
+    } else if (ordenObj && ordenObj.fechaCierre) {
+        estadoTexto = "Completada";
+    }
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                <div className={`px-6 py-5 flex justify-between items-center rounded-t-2xl sticky top-0 ${esDescarga ? 'bg-linear-to-r from-blue-700 to-blue-600' : 'bg-linear-to-r from-emerald-700 to-emerald-600'}`}>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white/10 rounded-xl">
+                            <Eye size={20} className="text-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-white">Detalle — OT-{orden.id_OrdenTransporte}</h3>
+                            <p className="text-xs text-white/60">{esDescarga ? 'Autorización de Descarga · Tipo 2' : 'Orden de Entrega · Tipo 1'}</p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="text-white/70 hover:text-white">
+                        <X size={22} />
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-5">
+                    <div className="grid grid-cols-2 gap-5">
+                        <Campo label="ID Orden Transporte" value={`OT-${orden.id_OrdenTransporte}`} />
+                        <Campo label="Tipo de Orden" value={esDescarga ? 'Descarga (2)' : 'Entrega (1)'} />
+                        <Campo label="Producto / Material" value={orden.ordenDetalle?.producto?.descripcion} />
+                        <Campo label={esDescarga ? 'Proveedor (Origen)' : 'Cliente (Destino)'}
+                            value={orden.ordenDetalle?.clienteProveedor?.descripcion ?? orden.ordenDetalle?.razonSocialClienteProveedor?.descripcion ?? orden.ordenDetalle?.id_RazonSocialClienteProveedor} />
+                        <Campo label="Transportista" value={orden.razonSocialTransportista?.descripcion} />
+                        <Campo label="Vehículo (Chasis)" value={orden.vehiculo?.patenteChasis} />
+                        <Campo label="Conductor"
+                            value={orden.conductor ? `${orden.conductor.apellido}, ${orden.conductor.nombre}` : undefined} />
+                        <Campo label="Nro. de Remito" value={orden.ordenDetalle?.nroRemito} />
+                        <Campo label="Cantidad (KG)"
+                            value={orden.ordenDetalle?.peso
+                                ? `${Number(orden.ordenDetalle.peso).toLocaleString('es-AR')} KG`
+                                : undefined} />
+                        <Campo label="Estado" value={estadoTexto} />
+                        <Campo label="Fecha Planificación"
+                            value={orden.ordenDetalle?.orden?.fechaPlanificacion
+                                ? new Date(orden.ordenDetalle.orden.fechaPlanificacion).toLocaleDateString('es-AR')
+                                : orden.fechaPlanificacion
+                                    ? new Date(orden.fechaPlanificacion).toLocaleDateString('es-AR')
+                                    : undefined} />
+                        <Campo label="PLAN ID" value={orden.id_OrdenDetalle} />
+                    </div>
+
+                    <div className="flex justify-end pt-2">
+                        <button
+                            onClick={onClose}
+                            className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ─────────── Modal Modificar (CU063 / CU069) ───────────
+const EditarOrdenModal = ({ isOpen, onClose, onSuccess, orden }) => {
+    const [productos, setProductos] = useState([]);
+    const [clientes, setClientes] = useState([]);
+    const [transportistas, setTransportistas] = useState([]);
+    const [vehiculos, setVehiculos] = useState([]);
+    const [conductores, setConductores] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [loadingOpts, setLoadingOpts] = useState(true);
+
+    const [formData, setFormData] = useState({
+        id_Producto: '',
+        id_RazonSocialCliente: '',
+        id_RazonSocialTransportista: '',
+        id_Vehiculo: '',
+        id_Conductor: '',
+        nroRemito: '',
+        cantidad: '',
+        fecha: new Date().toISOString().split('T')[0],
+    });
+
+    useEffect(() => {
+        if (isOpen && orden) {
+            setLoadingOpts(true);
+            const fechaRaw = orden.ordenDetalle?.orden?.fechaPlanificacion ?? orden.fechaPlanificacion;
+            setFormData({
+                id_Producto: orden.ordenDetalle?.id_Producto ?? '',
+                id_RazonSocialCliente: orden.ordenDetalle?.id_RazonSocialClienteProveedor ?? '',
+                id_RazonSocialTransportista: orden.id_RazonSocialTransportista ?? '',
+                id_Vehiculo: orden.id_Vehiculo ?? '',
+                id_Conductor: orden.id_Conductor ?? '',
+                nroRemito: orden.ordenDetalle?.nroRemito ?? '',
+                cantidad: orden.ordenDetalle?.peso ?? '',
+                fecha: fechaRaw ? new Date(fechaRaw).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            });
+
+            Promise.all([
+                agent.Productos.list(),
+                agent.RazonesSociales.list(),
+                agent.Vehiculos.list(),
+                agent.Conductores.list(),
+            ]).then(([prods, razons, vehs, conds]) => {
+                setProductos(prods);
+                setClientes(razons);
+                setTransportistas(razons.filter(r => r.esTransportista));
+                setVehiculos(vehs);
+                setConductores(conds);
+            }).catch(console.error).finally(() => setLoadingOpts(false));
+        }
+    }, [isOpen, orden]);
+
+    if (!isOpen || !orden) return null;
+
+    const tipoOrden = orden.ordenDetalle?.orden?.id_TipoOrden;
+    const esDescarga = tipoOrden === TIPO_DESCARGA;
+    const titulo = esDescarga ? 'Modificar Autorización de Descarga' : 'Modificar Orden de Entrega';
+
+    const handleChange = e => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async e => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const payload = {
+                id_Producto: parseInt(formData.id_Producto),
+                id_RazonSocialCliente: parseInt(formData.id_RazonSocialCliente),
+                id_RazonSocialTransportista: parseInt(formData.id_RazonSocialTransportista),
+                id_Vehiculo: parseInt(formData.id_Vehiculo),
+                id_Conductor: parseInt(formData.id_Conductor),
+                nroRemito: parseInt(formData.nroRemito),
+                cantidad: parseFloat(formData.cantidad),
+                fecha: new Date(formData.fecha).toISOString(),
+                id_TipoOrden: tipoOrden ?? TIPO_ENTREGA,
+            };
+            await agent.OrdenesTransporte.update(orden.id_OrdenTransporte, payload);
+            onSuccess();
+            onClose();
+        } catch (err) {
+            console.error(err);
+            alert(getErrorMessage(err, 'Error al modificar la orden.'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                <div className={`px-6 py-5 flex justify-between items-center rounded-t-2xl sticky top-0 ${esDescarga ? 'bg-linear-to-r from-blue-700 to-blue-600' : 'bg-linear-to-r from-emerald-700 to-emerald-600'}`}>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white/10 rounded-xl">
+                            <Pencil size={20} className="text-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-white">{titulo}</h3>
+                            <p className="text-xs text-white/60">OT-{orden.id_OrdenTransporte} · {esDescarga ? 'CU63 · Modificar Descarga' : 'CU69 · Modificar Entrega'}</p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="text-white/70 hover:text-white">
+                        <X size={22} />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                                <Calendar size={13} className="inline mr-1" />Fecha Planificada
+                            </label>
+                            <input
+                                type="date"
+                                name="fecha"
+                                value={formData.fecha}
+                                onChange={handleChange}
+                                className="w-full p-2.5 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Cantidad (KG)</label>
+                            <input
+                                type="number"
+                                name="cantidad"
+                                value={formData.cantidad}
+                                onChange={handleChange}
+                                placeholder="Ej: 30000"
+                                className="w-full p-2.5 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nro. de Remito</label>
+                        <input
+                            type="number"
+                            name="nroRemito"
+                            value={formData.nroRemito}
+                            onChange={handleChange}
+                            min="1"
+                            step="1"
+                            placeholder="Ej: 1000123"
+                            className="w-full p-2.5 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Producto / Material</label>
+                        <select
+                            name="id_Producto"
+                            value={formData.id_Producto}
+                            onChange={handleChange}
+                            className="w-full p-2.5 border border-slate-200 rounded-xl bg-white text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                            required
+                            disabled={loadingOpts}
+                        >
+                            <option value="">Seleccione Producto...</option>
+                            {productos.map(p => (
+                                <option key={p.id_Producto} value={p.id_Producto}>{p.descripcion}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                                {esDescarga ? 'Proveedor (Origen)' : 'Cliente (Destino)'}
+                            </label>
+                            <select
+                                name="id_RazonSocialCliente"
+                                value={formData.id_RazonSocialCliente}
+                                onChange={handleChange}
+                                className="w-full p-2.5 border border-slate-200 rounded-xl bg-white text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                                required
+                                disabled={loadingOpts}
+                            >
+                                <option value="">Seleccione...</option>
+                                {clientes.map(c => (
+                                    <option key={c.id_RazonSocial} value={c.id_RazonSocial}>{c.descripcion}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Transportista</label>
+                            <select
+                                name="id_RazonSocialTransportista"
+                                value={formData.id_RazonSocialTransportista}
+                                onChange={handleChange}
+                                className="w-full p-2.5 border border-slate-200 rounded-xl bg-white text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                                required
+                                disabled={loadingOpts}
+                            >
+                                <option value="">Seleccione Transportista...</option>
+                                {(transportistas.length > 0 ? transportistas : clientes).map(t => (
+                                    <option key={t.id_RazonSocial} value={t.id_RazonSocial}>{t.descripcion}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Vehículo (Chasis)</label>
+                            <select
+                                name="id_Vehiculo"
+                                value={formData.id_Vehiculo}
+                                onChange={handleChange}
+                                className="w-full p-2.5 border border-slate-200 rounded-xl bg-white text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                                required
+                                disabled={loadingOpts}
+                            >
+                                <option value="">Seleccione Vehículo...</option>
+                                {vehiculos.map(v => (
+                                    <option key={v.id_Vehiculo} value={v.id_Vehiculo}>{v.patenteChasis}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Conductor</label>
+                            <select
+                                name="id_Conductor"
+                                value={formData.id_Conductor}
+                                onChange={handleChange}
+                                className="w-full p-2.5 border border-slate-200 rounded-xl bg-white text-sm font-medium focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none"
+                                required
+                                disabled={loadingOpts}
+                            >
+                                <option value="">Seleccione Conductor...</option>
+                                {conductores.map(c => (
+                                    <option key={c.id_Conductor} value={c.id_Conductor}>{c.apellido}, {c.nombre}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {loadingOpts && (
+                        <p className="text-xs text-slate-400 flex items-center gap-1">
+                            <Loader2 size={12} className="animate-spin" /> Cargando opciones...
+                        </p>
+                    )}
+
+                    <div className="flex gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
                             disabled={loading || loadingOpts}
                             className={`flex-1 py-2.5 rounded-xl text-white font-bold text-sm transition-colors flex items-center justify-center gap-2 ${esDescarga ? 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20'}`}
                         >
                             {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                            {loading ? 'Guardando...' : `Crear ${esDescarga ? 'Autorización' : 'Entrega'}`}
+                            {loading ? 'Guardando...' : 'Guardar Cambios'}
                         </button>
                     </div>
                 </form>
@@ -279,6 +764,9 @@ const AutorizacionesPage = () => {
     const [tab, setTab] = useState('descarga');
     const [search, setSearch] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
+    const [detalleOrden, setDetalleOrden] = useState(null);
+    const [editarOrden, setEditarOrden] = useState(null);
+    const [cancelarOrden, setCancelarOrden] = useState(null);
 
     const load = () => {
         setLoading(true);
@@ -289,18 +777,47 @@ const AutorizacionesPage = () => {
 
     useEffect(() => { load(); }, []);
 
-    const filtered = ordenes.filter(o => {
-        const matchTab = tab === 'descarga' ? o.ordenDetalle?.orden?.id_TipoOrden === 1 : o.ordenDetalle?.orden?.id_TipoOrden === 2;
+    const handleDelete = async (item) => {
+        if (window.confirm(`¿Está seguro de eliminar permanentemente la orden OT-${item.id_OrdenTransporte}? Esta acción eliminará los detalles y planificaciones asociadas.`)) {
+            try {
+                await agent.OrdenesTransporte.delete(item.id_OrdenTransporte);
+                load();
+            } catch (err) {
+                console.error(err);
+                alert(getErrorMessage(err, 'Error al eliminar la orden.'));
+            }
+        }
+    };
+
+    const filtered = ordenes.filter(item => {
+        const tipo = item.ordenDetalle?.orden?.id_TipoOrden;
+        const matchTab = tab === 'descarga' ? tipo === TIPO_DESCARGA : tipo === TIPO_ENTREGA;
         const q = search.toLowerCase();
         const matchSearch = !q ||
-            (o.ordenDetalle?.producto?.descripcion ?? '').toLowerCase().includes(q) ||
-            (o.razonSocialTransportista?.descripcion ?? '').toLowerCase().includes(q) ||
-            String(o.id_OrdenTransporte).includes(q);
-        return matchSearch; // show all if tabs don't filter well yet (tipo orden not always loaded)
+            (item.ordenDetalle?.producto?.descripcion ?? '').toLowerCase().includes(q) ||
+            (item.razonSocialTransportista?.descripcion ?? '').toLowerCase().includes(q) ||
+            String(item.id_OrdenTransporte).includes(q);
+        return matchTab && matchSearch;
     });
 
-    const getEstadoBadge = (o) => {
-        const pesadasCount = 0; // Would need pesadas data for full logic
+    const getEstadoBadge = (item) => {
+        const ordenObj = item.ordenDetalle?.orden;
+        if (ordenObj && ordenObj.activo === false && (ordenObj.fechaAnulacion || ordenObj.motivoAnulacion)) {
+            return (
+                <div className="flex items-center gap-1.5" title={`Motivo: ${ordenObj.motivoAnulacion || 'Sin motivo'}`}>
+                    <Ban size={14} className="text-red-500" />
+                    <span className="text-xs font-bold text-red-600">Cancelada</span>
+                </div>
+            );
+        }
+        if (ordenObj && ordenObj.fechaCierre) {
+            return (
+                <div className="flex items-center gap-1.5">
+                    <CheckCircle2 size={14} className="text-emerald-500" />
+                    <span className="text-xs font-bold text-emerald-600">Completada</span>
+                </div>
+            );
+        }
         return (
             <div className="flex items-center gap-1.5">
                 <CheckCircle2 size={14} className="text-blue-500" />
@@ -315,7 +832,7 @@ const AutorizacionesPage = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800">Planificación Logística</h2>
-                    <p className="text-slate-500 text-sm">Autorizaciones de Descarga (CU61) · Órdenes de Entrega (CU66)</p>
+                    <p className="text-slate-500 text-sm">Autorizaciones de Descarga (CU060-CU065) · Órdenes de Entrega (CU066-CU071)</p>
                 </div>
                 <button
                     onClick={() => setModalOpen(true)}
@@ -376,18 +893,19 @@ const AutorizacionesPage = () => {
                                 <th className="px-8 py-4 font-bold">Cantidad</th>
                                 <th className="px-8 py-4 font-bold">Estado</th>
                                 <th className="px-8 py-4 font-bold">Fecha</th>
+                                <th className="px-8 py-4 font-bold">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {loading ? (
                                 [1, 2, 3].map(i => (
                                     <tr key={i} className="animate-pulse">
-                                        <td colSpan="7" className="px-8 py-6 h-16 bg-slate-50/20" />
+                                        <td colSpan="8" className="px-8 py-6 h-16 bg-slate-50/20" />
                                     </tr>
                                 ))
                             ) : filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7" className="px-8 py-20 text-center text-slate-400 font-medium">
+                                    <td colSpan="8" className="px-8 py-20 text-center text-slate-400 font-medium">
                                         <div className="flex flex-col items-center gap-3">
                                             <FileText size={48} className="opacity-10" />
                                             <p>No se encontraron registros.</p>
@@ -401,46 +919,101 @@ const AutorizacionesPage = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                filtered.map((item) => (
-                                    <tr key={item.id_OrdenTransporte} className="hover:bg-slate-50/80 transition-colors group">
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-2 rounded-lg bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform">
-                                                    <FileText size={18} />
+                                filtered.map((item) => {
+                                    const tipo = item.ordenDetalle?.orden?.id_TipoOrden;
+                                    const esDesc = tipo === TIPO_DESCARGA;
+                                    const colorIcon = esDesc
+                                        ? 'bg-blue-50 text-blue-600'
+                                        : 'bg-emerald-50 text-emerald-600';
+                                    const colorBadge = esDesc
+                                        ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                        : 'bg-emerald-50 text-emerald-700 border-emerald-100';
+                                    const esActiva = item.ordenDetalle?.orden?.activo !== false && !item.ordenDetalle?.orden?.fechaCierre;
+                                    return (
+                                        <tr key={item.id_OrdenTransporte} className="hover:bg-slate-50/80 transition-colors group">
+                                            <td className="px-8 py-5">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`p-2 rounded-lg ${colorIcon} group-hover:scale-110 transition-transform`}>
+                                                        <FileText size={18} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-slate-700 text-sm">OT-{item.id_OrdenTransporte}</p>
+                                                        <p className="text-[10px] text-slate-400 font-bold">PLAN ID: {item.id_OrdenDetalle}</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-700 text-sm">OT-{item.id_OrdenTransporte}</p>
-                                                    <p className="text-[10px] text-slate-400 font-bold">PLAN ID: {item.id_OrdenDetalle}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-black bg-blue-50 text-blue-700 border border-blue-100 uppercase tracking-tighter">
-                                                {item.ordenDetalle?.producto?.descripcion || 'N/A'}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5 text-sm font-medium text-slate-700">
-                                            {item.razonSocialTransportista?.descripcion || 'N/A'}
-                                        </td>
-                                        <td className="px-8 py-5 text-sm font-bold text-slate-800">
-                                            {item.vehiculo?.patenteChasis || 'N/A'}
-                                        </td>
-                                        <td className="px-8 py-5 font-bold text-slate-800 text-sm">
-                                            {item.ordenDetalle?.peso
-                                                ? `${Number(item.ordenDetalle.peso).toLocaleString('es-AR')} KG`
-                                                : '—'}
-                                        </td>
-                                        <td className="px-8 py-5">{getEstadoBadge(item)}</td>
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                                                <Clock size={12} />
-                                                {item.ordenDetalle?.orden?.fechaPlanificacion
-                                                    ? new Date(item.ordenDetalle.orden.fechaPlanificacion).toLocaleDateString('es-AR')
+                                            </td>
+                                            <td className="px-8 py-5">
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-black border uppercase tracking-tighter ${colorBadge}`}>
+                                                    {item.ordenDetalle?.producto?.descripcion || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-5 text-sm font-medium text-slate-700">
+                                                {item.razonSocialTransportista?.descripcion || 'N/A'}
+                                            </td>
+                                            <td className="px-8 py-5 text-sm font-bold text-slate-800">
+                                                {item.vehiculo?.patenteChasis || 'N/A'}
+                                            </td>
+                                            <td className="px-8 py-5 font-bold text-slate-800 text-sm">
+                                                {item.ordenDetalle?.peso
+                                                    ? `${Number(item.ordenDetalle.peso).toLocaleString('es-AR')} KG`
                                                     : '—'}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                            </td>
+                                            <td className="px-8 py-5">{getEstadoBadge(item)}</td>
+                                            <td className="px-8 py-5">
+                                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                                                    <Clock size={12} />
+                                                    {item.ordenDetalle?.orden?.fechaPlanificacion
+                                                        ? new Date(item.ordenDetalle.orden.fechaPlanificacion).toLocaleDateString('es-AR')
+                                                        : item.fechaPlanificacion
+                                                            ? new Date(item.fechaPlanificacion).toLocaleDateString('es-AR')
+                                                            : '—'}
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-5">
+                                                <div className="flex items-center gap-1.5">
+                                                    {/* Ver Detalle (CU062 / CU068) */}
+                                                    <button
+                                                        onClick={() => setDetalleOrden(item)}
+                                                        title="Ver detalle"
+                                                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                    {/* Modificar (CU063 / CU069) */}
+                                                    {esActiva && (
+                                                        <button
+                                                            onClick={() => setEditarOrden(item)}
+                                                            title="Modificar"
+                                                            className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                                                        >
+                                                            <Pencil size={16} />
+                                                        </button>
+                                                    )}
+                                                    {/* Cancelar (CU064 / CU070) */}
+                                                    {esActiva && (
+                                                        <button
+                                                            onClick={() => setCancelarOrden(item)}
+                                                            title="Cancelar orden"
+                                                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                        >
+                                                            <Ban size={16} />
+                                                        </button>
+                                                    )}
+                                                    {/* Eliminar (CU065 / CU071) */}
+                                                    {esActiva && (
+                                                        <button
+                                                            onClick={() => handleDelete(item)}
+                                                            title="Eliminar orden"
+                                                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
@@ -452,6 +1025,26 @@ const AutorizacionesPage = () => {
                 onClose={() => setModalOpen(false)}
                 onSuccess={load}
                 tipoOrden={tab}
+            />
+
+            <DetalleOrdenModal
+                isOpen={!!detalleOrden}
+                onClose={() => setDetalleOrden(null)}
+                orden={detalleOrden}
+            />
+
+            <EditarOrdenModal
+                isOpen={!!editarOrden}
+                onClose={() => setEditarOrden(null)}
+                onSuccess={load}
+                orden={editarOrden}
+            />
+
+            <CancelarOrdenModal
+                isOpen={!!cancelarOrden}
+                onClose={() => setCancelarOrden(null)}
+                onSuccess={load}
+                orden={cancelarOrden}
             />
         </div>
     );
