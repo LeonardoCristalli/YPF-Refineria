@@ -101,8 +101,8 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Patente Chasis</label>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 name="patenteChasis"
                                 value={formData.patenteChasis}
                                 onChange={handleChange}
@@ -117,8 +117,8 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Patente Acoplado</label>
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 name="patenteAcoplado"
                                 value={formData.patenteAcoplado}
                                 onChange={handleChange}
@@ -133,46 +133,46 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Peso Máximo (KG)</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 name="pesoMaximo"
                                 value={formData.pesoMaximo}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                                min="0"
+                                min="0.01"
                                 step="0.01"
                             />
                         </div>
 
-                         <div>
+                        <div>
                             <label className="block text-sm font-medium text-gray-700">Volumen Máximo</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 name="volumenMaximo"
                                 value={formData.volumenMaximo}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                                min="0"
+                                min="0.01"
                                 step="0.01"
                             />
                         </div>
-                        
-                         <div>
+
+                        <div>
                             <label className="block text-sm font-medium text-gray-700">Peso Sin Carga</label>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 name="pesoSinCargas"
                                 value={formData.pesoSinCargas}
                                 onChange={handleChange}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-                                min="0"
+                                min="0.01"
                                 step="0.01"
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Transportista</label>
-                            <select 
+                            <select
                                 name="id_RazonSocial"
                                 value={formData.id_RazonSocial}
                                 onChange={handleChange}
@@ -187,14 +187,14 @@ const VehiculoForm = ({ isOpen, onClose, onSuccess, initialValues }) => {
                     </div>
 
                     <div className="flex justify-end pt-4 gap-3">
-                        <button 
+                        <button
                             type="button"
                             onClick={onClose}
                             className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 bg "
                         >
                             Cancelar
                         </button>
-                        <button 
+                        <button
                             type="submit"
                             disabled={loading}
                             className="px-4 py-2 bg-blue-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 flex items-center gap-2"
