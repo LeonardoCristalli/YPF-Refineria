@@ -113,5 +113,7 @@
     <None Include="scripts\testdata\seed_demo.sql" />
     <None Include="scripts\sysdata\script_sysdata_t_estadoordentransporte.sql" />
     <None Include="Balanza.CILP.DataBase.publish.xml" />
+    <None Include="Balanza_1.CILP.DataBase.publish.xml" />
+    <None Include="Balanza_2.CILP.DataBase.publish.xml" />
   </ItemGroup>
 </Project>
