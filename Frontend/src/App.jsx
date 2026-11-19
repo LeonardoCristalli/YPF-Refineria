@@ -10,6 +10,7 @@ import ProductosPage from './features/masters/ProductosPage';
 import RazonesSocialesPage from './features/masters/RazonesSocialesPage';
 import BasculasPage from './features/masters/BasculasPage';
 import UsuariosPage from './features/masters/UsuariosPage';
+import TanquesPage from './features/masters/TanquesPage';
 import AutorizacionesPage from './features/planificacion/AutorizacionesPage';
 import ReportesPage from './features/reportes/ReportesPage';
 
@@ -18,19 +19,20 @@ function App() {
     <Routes>
       <Route path="/" element={<MainLayout />}>
         <Route index element={<Dashboard />} />
-        
+
         {/* Operaciones */}
         <Route path="pesadas" element={<PesadasPage />} />
         <Route path="ordenes-transporte" element={<OrdenesTransportePage />} />
         <Route path="planificacion" element={<AutorizacionesPage />} />
         <Route path="reportes" element={<ReportesPage />} />
-        
+
         {/* Maestros */}
         <Route path="vehiculos" element={<VehiculosPage />} />
         <Route path="conductores" element={<ConductoresPage />} />
         <Route path="productos" element={<ProductosPage />} />
         <Route path="razones-sociales" element={<RazonesSocialesPage />} />
         <Route path="basculas" element={<BasculasPage />} />
+        <Route path="tanques" element={<TanquesPage />} />
         <Route path="usuarios" element={<UsuariosPage />} />
       </Route>
     </Routes>

@@ -11,6 +11,7 @@ const requests = {
     post: (url, body) => agent.post(url, body).then(responseBody),
     put: (url, body) => agent.put(url, body).then(responseBody),
     del: (url) => agent.delete(url).then(responseBody),
+    patch: (url, body) => agent.patch(url, body).then(responseBody),
 };
 
 const createCrud = (endpoint) => ({
@@ -27,7 +28,12 @@ const Productos = createCrud('/Productos');
 const RazonesSociales = createCrud('/RazonesSociales');
 const Basculas = createCrud('/Basculas');
 const Usuarios = createCrud('/Usuarios');
-const OrdenesTransporte = createCrud('/OrdenesTransporte');
+const Tanques = createCrud('/Tanques');
+const OrdenesTransporte = {
+    ...createCrud('/OrdenesTransporte'),
+    cancelar: (id, motivo) => requests.patch(`/OrdenesTransporte/${id}/cancelar`, { motivo }),
+    byPatente: (patente) => requests.get(`/OrdenesTransporte/ByPatente/${patente}`),
+};
 const Planificaciones = createCrud('/Planificaciones');
 const Ordenes = createCrud('/Ordenes');
 
@@ -36,12 +42,29 @@ const Pesadas = {
     create: (pesada) => requests.post('/Pesadas', pesada),
     byPlanificacion: (id) => requests.get(`/Pesadas/ByPlanificacion/${id}`),
     byOrdenTransporte: (id) => requests.get(`/Pesadas/ByOrdenTransporte/${id}`),
+    ticket: (idPlanificacion) => requests.get(`/Pesadas/Ticket/${idPlanificacion}`),
 };
 
 const Reportes = {
     duracionOrdenes: () => requests.get('/Reportes/duracion-ordenes'),
     ocupacionBasculas: () => requests.get('/Reportes/ocupacion-basculas'),
     kpis: () => requests.get('/Reportes/kpis'),
+    movimientosPorPeriodo: (desde, hasta, idTipoOrden, replanificado) => {
+        let q = [];
+        if (desde) q.push(`desde=${encodeURIComponent(desde)}`);
+        if (hasta) q.push(`hasta=${encodeURIComponent(hasta)}`);
+        if (idTipoOrden) q.push(`idTipoOrden=${encodeURIComponent(idTipoOrden)}`);
+        if (replanificado !== undefined) q.push(`replanificado=${replanificado}`);
+        const qs = q.length > 0 ? `?${q.join('&')}` : '';
+        return requests.get(`/Reportes/movimientos-por-periodo${qs}`);
+    },
+    movimientosPorProducto: (desde, hasta) => {
+        let q = [];
+        if (desde) q.push(`desde=${encodeURIComponent(desde)}`);
+        if (hasta) q.push(`hasta=${encodeURIComponent(hasta)}`);
+        const qs = q.length > 0 ? `?${q.join('&')}` : '';
+        return requests.get(`/Reportes/movimientos-por-producto${qs}`);
+    },
 };
 
 export default {
@@ -51,6 +74,7 @@ export default {
     RazonesSociales,
     Basculas,
     Usuarios,
+    Tanques,
     OrdenesTransporte,
     Planificaciones,
     Ordenes,

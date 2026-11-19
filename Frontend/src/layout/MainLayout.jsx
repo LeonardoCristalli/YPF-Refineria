@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import {
     Truck, Scale, LayoutDashboard, Users, Package,
     Briefcase, UserCheck, Monitor, Bell, Search,
-    Settings, LogOut, ChevronRight, FileText, BarChart2
+    Settings, LogOut, ChevronRight, FileText, BarChart2, Database
 } from 'lucide-react';
 
 const MainLayout = () => {
@@ -26,6 +26,7 @@ const MainLayout = () => {
                 { path: "/productos", label: "Productos", icon: <Package size={20} /> },
                 { path: "/razones-sociales", label: "Razones Sociales", icon: <Briefcase size={20} /> },
                 { path: "/basculas", label: "Básculas", icon: <Monitor size={20} /> },
+                { path: "/tanques", label: "Tanques", icon: <Database size={20} /> },
                 { path: "/usuarios", label: "Usuarios", icon: <UserCheck size={20} /> },
             ]
         }
@@ -140,4 +141,3 @@ const MainLayout = () => {
 };
 
 export default MainLayout;
-
