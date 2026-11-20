@@ -50,6 +50,7 @@ const CrudTable = ({
     idField = 'id',
     nameField,       // campo para mostrar en el modal de confirmación
     onCreate,
+    canCreate = true, // false en maestros sin alta (Puntos de Menú)
     onEdit,
     onDelete,
     softDelete = true, // false en tablas sin baja lógica (Básculas, OT)
@@ -123,12 +124,14 @@ const CrudTable = ({
                     <h2 className="text-2xl font-bold text-slate-800">{title}</h2>
                     <p className="text-slate-500 text-sm mt-0.5">{data.length} registro{data.length !== 1 ? 's' : ''} activo{data.length !== 1 ? 's' : ''}</p>
                 </div>
-                <button
-                    onClick={onCreate}
-                    className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all active:scale-95"
-                >
-                    <Plus size={18} /> Nuevo
-                </button>
+                {canCreate && (
+                    <button
+                        onClick={onCreate}
+                        className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+                    >
+                        <Plus size={18} /> Nuevo
+                    </button>
+                )}
             </div>
 
             {/* Search bar */}
