@@ -18,11 +18,11 @@ El documento de Entrega 3 define **78 casos de uso** (CU01 a CU24 y CU030 a CU08
 
 | Estado | Casos de uso | Cantidad |
 |---|---|---|
-| Implementado | CU10-CU24, CU030-CU039, CU050-CU059, CU060-CU079, CU080-CU083 | 59 |
+| Implementado | CU01-CU04, CU10-CU24, CU030-CU059, CU060-CU079, CU080-CU083 | 73 |
 | Parcial | — | 0 |
-| Pendiente | CU01-CU09, CU040-CU049 | 19 |
+| Pendiente | CU05-CU09 | 5 |
 
-Avance por casos de uso: **59 de 78 (76 %)**. Si se cuentan también las funcionalidades transversales pendientes de la sección 3 (autenticación, RBAC, 2FA e integración con hardware), el avance total ronda el 72 %.
+Avance por casos de uso: **73 de 78 (94 %)**. Si se cuentan también las funcionalidades transversales pendientes de la sección 3 (autenticación, RBAC, 2FA e integración con hardware), son 73 de 82 ítems (89 %).
 
 > El conteo por estado debe recalcularse cuando cambie la tabla de la sección 2.
 
@@ -32,15 +32,15 @@ Avance por casos de uso: **59 de 78 (76 %)**. Si se cuentan también las funcion
 
 | CU | Nombre | Estado | Observaciones |
 |---|---|---|---|
-| CU01-CU04 | Puntos de Menú (consultar, ver, modificar, eliminar) | Pendiente | El menú es fijo en la interfaz. La tabla de casos de uso existe en la base de datos con sus datos iniciales, sin pantalla de administración. |
+| CU01-CU04 | Puntos de Menú (consultar, ver, modificar, eliminar) | Implementado | `PuntosMenuController` y pantalla `PuntosMenuPage` sobre `t_CasoDeUso`. Sin alta, porque la especificación no la incluye. Reglas de CU03: el nombre es obligatorio y único entre los puntos de menú. La baja es lógica y quita además el punto de los roles que lo tenían asignado. |
 | CU05-CU09 | Roles (consultar, crear, ver, modificar, eliminar) | Pendiente | Los roles y sus permisos existen en la base de datos como datos iniciales, sin pantalla de administración. |
 | CU10-CU14 | Usuarios | Implementado | Alta, consulta, modificación y baja. Las contraseñas se guardan como hash. |
 | CU15-CU19 | Conductores | Implementado | |
 | CU20-CU24 | Vehículos | Implementado | Reglas de CU021 y CU023: campos obligatorios, pesos y volumen mayores a cero, peso máximo mayor al peso sin carga, patente de chasis única entre vehículos activos y razón social existente y activa. |
 | CU030-CU034 | Productos | Implementado | |
 | CU035-CU039 | Razones Sociales | Implementado | |
-| CU040-CU044 | Dispositivos de Detección de Vehículo | Pendiente | La tabla existe en la base de datos, sin pantalla ni API. |
-| CU045-CU049 | Puntos de Expedición y Recepción | Pendiente | La tabla existe y el sistema asigna el puesto al crear órdenes, sin pantalla de administración. |
+| CU040-CU044 | Dispositivos de Detección de Vehículo | Implementado | Alta, consulta, modificación y baja lógica (`DispositivosDetectoresController`, pantalla `DispositivosPage`). Reglas de CU042 y CU043: IP obligatoria con formato IPv4 y única entre dispositivos activos. La descripción admite hasta 30 caracteres, límite de la columna (la especificación dice 50). |
+| CU045-CU049 | Puntos de Expedición y Recepción | Implementado | Alta, consulta, modificación y baja lógica (`PuestosController`, pantalla `PuestosPage`). Descripción obligatoria de hasta 50 caracteres (CU047 y CU048). No se puede eliminar un puesto con órdenes asociadas. |
 | CU050-CU054 | Básculas | Implementado | Reglas de CU052 y CU053: vencimiento del certificado posterior a la fecha actual, IP con formato IPv4 y única entre básculas activas, y combinación de lote, serie y certificado habilitado única. Baja lógica para conservar el historial de pesadas. |
 | CU055-CU059 | Tanques de Almacenamiento | Implementado | Alta, consulta, modificación y baja lógica (`TanquesController`, pantalla `TanquesPage`). Reglas de CU057 y CU058: código obligatorio, alfanumérico (letras, números y guiones), de hasta 20 caracteres y único entre tanques activos; descripción de 2 a 50 caracteres; volumen máximo mayor a cero. El volumen ocupado lo gestionan las autorizaciones de descarga: no se edita a mano. No se puede reducir el volumen máximo por debajo del ocupado ni dar de baja un tanque con volumen almacenado. |
 
@@ -80,10 +80,3 @@ Avance por casos de uso: **59 de 78 (76 %)**. Si se cuentan también las funcion
 | Doble factor de autenticación (2FA) | Pendiente | Su inclusión depende del tiempo disponible. |
 | Panel de control (Dashboard) | Implementado | Métricas operativas en tiempo real. |
 | Integración con básculas y cámaras (Device Connector, OCR) | Pendiente | No hay comunicación con hardware real. |
-
-## 4. Inconsistencias detectadas en la documentación
-
-1. **Casos de uso omitidos en `CUs.md`:** el archivo no menciona CU080 ni CU081, que sí figuran en el documento de Entrega 3.
-2. **Numeración:** `CUs.md` mezcla formatos (CU20 y CU030) y usa el prefijo `CUOV` en las reglas de negocio del CU21. Conviene unificarlos con el documento de Entrega 3.
-3. **Arquitectura:** `CUs.md` indica Clean Architecture. El backend implementado es un único proyecto ASP.NET Core con carpetas de controladores, modelos y acceso a datos. Debe reflejarse en la documentación (ver el apéndice de desvíos).
-4. **Restos de edición:** `CUs.md` contiene marcas `[cite_start]` y `[cite: …]` que deben eliminarse, y una referencia a "Gemini" en la sección de arquitectura.
