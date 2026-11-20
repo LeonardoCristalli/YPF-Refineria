@@ -29,6 +29,9 @@ const RazonesSociales = createCrud('/RazonesSociales');
 const Basculas = createCrud('/Basculas');
 const Usuarios = createCrud('/Usuarios');
 const Tanques = createCrud('/Tanques');
+const DispositivosDetectores = createCrud('/DispositivosDetectores');
+const Puestos = createCrud('/Puestos');
+const PuntosMenu = createCrud('/PuntosMenu');
 const OrdenesTransporte = {
     ...createCrud('/OrdenesTransporte'),
     cancelar: (id, motivo) => requests.patch(`/OrdenesTransporte/${id}/cancelar`, { motivo }),
@@ -75,6 +78,9 @@ export default {
     Basculas,
     Usuarios,
     Tanques,
+    DispositivosDetectores,
+    Puestos,
+    PuntosMenu,
     OrdenesTransporte,
     Planificaciones,
     Ordenes,

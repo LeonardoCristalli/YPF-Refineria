@@ -11,6 +11,9 @@ import RazonesSocialesPage from './features/masters/RazonesSocialesPage';
 import BasculasPage from './features/masters/BasculasPage';
 import UsuariosPage from './features/masters/UsuariosPage';
 import TanquesPage from './features/masters/TanquesPage';
+import DispositivosPage from './features/masters/DispositivosPage';
+import PuestosPage from './features/masters/PuestosPage';
+import PuntosMenuPage from './features/masters/PuntosMenuPage';
 import AutorizacionesPage from './features/planificacion/AutorizacionesPage';
 import ReportesPage from './features/reportes/ReportesPage';
 
@@ -33,6 +36,9 @@ function App() {
         <Route path="razones-sociales" element={<RazonesSocialesPage />} />
         <Route path="basculas" element={<BasculasPage />} />
         <Route path="tanques" element={<TanquesPage />} />
+        <Route path="puestos" element={<PuestosPage />} />
+        <Route path="dispositivos" element={<DispositivosPage />} />
+        <Route path="puntos-menu" element={<PuntosMenuPage />} />
         <Route path="usuarios" element={<UsuariosPage />} />
       </Route>
     </Routes>
