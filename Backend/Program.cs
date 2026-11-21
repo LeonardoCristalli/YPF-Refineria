@@ -1,4 +1,5 @@
 using Backend.Data;
+using Backend.Hardware;
 using Backend.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
         "\"Server=.\\SQLEXPRESS;Database=BalanzaCILP;Trusted_Connection=True;TrustServerCertificate=True\"");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
+// Device Connector: simulado por defecto. Para hardware real, implementar IDeviceConnector
+// y registrarlo cuando Hardware:Modo sea "Real".
+var modoHardware = builder.Configuration.GetValue<string>("Hardware:Modo") ?? "Simulado";
+if (modoHardware.Equals("Simulado", StringComparison.OrdinalIgnoreCase))
+    builder.Services.AddSingleton<IDeviceConnector, SimulatedDeviceConnector>();
+else
+    throw new InvalidOperationException("Hardware:Modo = \"" + modoHardware + "\" no tiene un conector registrado. Use \"Simulado\".");
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
