@@ -185,3 +185,23 @@ Para mantener el sistema actualizado, utilice la sección Administración del me
 
 **P: ¿Cómo corrijo una orden mal cargada?**
 > R: Vaya a **Planificación Logística**, busque la orden y use **Modificar** para corregir los datos, o **Cancelar orden** (con motivo) si ya no corresponde. Una orden con pesajes registrados no puede eliminarse.
+
+---
+
+## Roles y Permisos
+
+En el menú **Administración**, la opción **Roles y Permisos** permite definir qué puntos de menú tiene cada rol.
+
+1.  Haga clic en **Roles y Permisos**. Verá los roles con la cantidad de puntos de menú asignados.
+2.  Para crear un rol, use **+ Nuevo**, escriba la descripción (de 3 a 50 caracteres, sin repetir una existente) y tilde los puntos de menú que corresponden. Haga clic en **Guardar**.
+3.  Para consultar un rol use el ícono del ojo; para modificarlo, el lápiz; para darlo de baja, la papelera.
+
+> **No se puede eliminar un rol que tiene usuarios asignados.** El sistema muestra un mensaje indicándolo.
+
+## Lectura de báscula y cámara
+
+En esta versión los equipos son **simulados**, pero se usan igual que los reales:
+
+*   **Leer de báscula:** en **Nueva Pesada**, elija la orden y la báscula y haga clic en **Leer de báscula** (arriba del campo *Peso*). El peso se completa solo y la pesada queda registrada como **AUTO**. Si la báscula no está operativa (por ejemplo, con el certificado vencido), use **Ingreso Manual** y escriba el motivo.
+*   **Detectar con cámara:** en **Gestión de Pesadas**, el botón **Detectar con cámara** lee la patente del camión que está en la entrada y muestra su orden, igual que la búsqueda por patente.
+*   **Estado de Hardware:** el Panel de Control muestra si cada báscula y cámara está en línea.

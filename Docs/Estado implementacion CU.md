@@ -10,7 +10,7 @@ Este documento compara los casos de uso especificados (según el documento de En
 | Parcial | Existe una parte del caso de uso; el detalle indica qué falta. |
 | Pendiente | No está disponible en la aplicación. |
 
-**Fecha de corte:** 19/11/2026. Actualizar la tabla antes de la entrega final.
+**Fecha de corte:** 21/11/2026. Actualizar la tabla antes de la entrega final.
 
 ## 1. Resumen
 
@@ -18,11 +18,11 @@ El documento de Entrega 3 define **78 casos de uso** (CU01 a CU24 y CU030 a CU08
 
 | Estado | Casos de uso | Cantidad |
 |---|---|---|
-| Implementado | CU01-CU04, CU10-CU24, CU030-CU059, CU060-CU079, CU080-CU083 | 73 |
+| Implementado | CU01-CU24, CU030-CU083 | 78 |
 | Parcial | — | 0 |
-| Pendiente | CU05-CU09 | 5 |
+| Pendiente | — | 0 |
 
-Avance por casos de uso: **73 de 78 (94 %)**. Si se cuentan también las funcionalidades transversales pendientes de la sección 3 (autenticación, RBAC, 2FA e integración con hardware), son 73 de 82 ítems (89 %).
+Avance por casos de uso: **78 de 78 (100 %)**. Falta únicamente la autenticación (inicio de sesión), con el control de acceso por roles y el doble factor que dependen de ella (sección 3).
 
 > El conteo por estado debe recalcularse cuando cambie la tabla de la sección 2.
 
@@ -33,13 +33,13 @@ Avance por casos de uso: **73 de 78 (94 %)**. Si se cuentan también las funcion
 | CU | Nombre | Estado | Observaciones |
 |---|---|---|---|
 | CU01-CU04 | Puntos de Menú (consultar, ver, modificar, eliminar) | Implementado | `PuntosMenuController` y pantalla `PuntosMenuPage` sobre `t_CasoDeUso`. Sin alta, porque la especificación no la incluye. Reglas de CU03: el nombre es obligatorio y único entre los puntos de menú. La baja es lógica y quita además el punto de los roles que lo tenían asignado. |
-| CU05-CU09 | Roles (consultar, crear, ver, modificar, eliminar) | Pendiente | Los roles y sus permisos existen en la base de datos como datos iniciales, sin pantalla de administración. |
+| CU05-CU09 | Roles (consultar, crear, ver, modificar, eliminar) | Implementado | `RolesController` y pantalla `RolesPage` sobre `t_Rol` y `t_RolCasoDeUso`. Reglas: descripción obligatoria de 3 a 50 caracteres y única entre roles activos, puntos de menú asignados existentes y activos, y no se puede eliminar un rol con usuarios asignados. La baja es lógica y quita sus asignaciones. |
 | CU10-CU14 | Usuarios | Implementado | Alta, consulta, modificación y baja. Las contraseñas se guardan como hash. |
 | CU15-CU19 | Conductores | Implementado | |
 | CU20-CU24 | Vehículos | Implementado | Reglas de CU021 y CU023: campos obligatorios, pesos y volumen mayores a cero, peso máximo mayor al peso sin carga, patente de chasis única entre vehículos activos y razón social existente y activa. |
 | CU030-CU034 | Productos | Implementado | |
 | CU035-CU039 | Razones Sociales | Implementado | |
-| CU040-CU044 | Dispositivos de Detección de Vehículo | Implementado | Alta, consulta, modificación y baja lógica (`DispositivosDetectoresController`, pantalla `DispositivosPage`). Reglas de CU042 y CU043: IP obligatoria con formato IPv4 y única entre dispositivos activos. La descripción admite hasta 30 caracteres, límite de la columna (la especificación dice 50). |
+| CU040-CU044 | Dispositivos de Detección de Vehículo | Implementado | Alta, consulta, modificación y baja lógica (`DispositivosDetectoresController`, pantalla `DispositivosPage`). Reglas de CU042 y CU043: IP obligatoria con formato IPv4 y única entre dispositivos activos. La descripción admite hasta 50 caracteres, según la especificación (se amplió la columna). |
 | CU045-CU049 | Puntos de Expedición y Recepción | Implementado | Alta, consulta, modificación y baja lógica (`PuestosController`, pantalla `PuestosPage`). Descripción obligatoria de hasta 50 caracteres (CU047 y CU048). No se puede eliminar un puesto con órdenes asociadas. |
 | CU050-CU054 | Básculas | Implementado | Reglas de CU052 y CU053: vencimiento del certificado posterior a la fecha actual, IP con formato IPv4 y única entre básculas activas, y combinación de lote, serie y certificado habilitado única. Baja lógica para conservar el historial de pesadas. |
 | CU055-CU059 | Tanques de Almacenamiento | Implementado | Alta, consulta, modificación y baja lógica (`TanquesController`, pantalla `TanquesPage`). Reglas de CU057 y CU058: código obligatorio, alfanumérico (letras, números y guiones), de hasta 20 caracteres y único entre tanques activos; descripción de 2 a 50 caracteres; volumen máximo mayor a cero. El volumen ocupado lo gestionan las autorizaciones de descarga: no se edita a mano. No se puede reducir el volumen máximo por debajo del ocupado ni dar de baja un tanque con volumen almacenado. |
@@ -76,7 +76,7 @@ Avance por casos de uso: **73 de 78 (94 %)**. Si se cuentan también las funcion
 | Funcionalidad | Estado | Observaciones |
 |---|---|---|
 | Autenticación (inicio de sesión) | Pendiente | A implementar antes de la entrega final según indicación. |
-| Control de acceso por roles (RBAC) | Pendiente | Las tablas de roles y casos de uso ya existen en la base de datos. |
-| Doble factor de autenticación (2FA) | Pendiente | Su inclusión depende del tiempo disponible. |
+| Control de acceso por roles (RBAC) | Pendiente | Depende del inicio de sesión. El ABM de roles y la asignación de puntos de menú ya están implementados. |
+| Doble factor de autenticación (2FA) | Pendiente | Depende del inicio de sesión. |
 | Panel de control (Dashboard) | Implementado | Métricas operativas en tiempo real. |
-| Integración con básculas y cámaras (Device Connector, OCR) | Pendiente | No hay comunicación con hardware real. |
+| Integración con básculas y cámaras (Device Connector, OCR) | Simulado | `IDeviceConnector` con una implementación simulada (`SimulatedDeviceConnector`, `Hardware:Modo = "Simulado"`). La pantalla de pesadas tiene "Leer de báscula" (la pesada queda como automática) y "Detectar con cámara" (obtiene la patente y su orden), y el Panel de Control muestra el estado de los equipos. Para hardware real hay que escribir otro conector que implemente la misma interfaz. |
