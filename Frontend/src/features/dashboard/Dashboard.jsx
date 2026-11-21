@@ -35,6 +35,12 @@ const Dashboard = () => {
     const [pesadas, setPesadas] = useState([]);
     const [planificaciones, setPlanificaciones] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [hardware, setHardware] = useState(null);
+
+    // Estado real de básculas y cámaras, consultado al Device Connector.
+    useEffect(() => {
+        agent.Hardware.estado().then(setHardware).catch(() => setHardware(null));
+    }, []);
 
     useEffect(() => {
         const load = async () => {
@@ -197,26 +203,30 @@ const Dashboard = () => {
                     <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
                         <div className="relative z-10">
                             <h3 className="font-bold text-sm text-blue-400 uppercase tracking-widest mb-1">Estado de Hardware</h3>
-                            <p className="text-2xl font-bold mb-4">Básculas Operativas</p>
+                            <p className="text-2xl font-bold mb-4">
+                                {!hardware ? 'Sin información' : [...hardware.basculas, ...hardware.dispositivos].every(e => e.estado === 'ONLINE') ? 'Equipos Operativos' : 'Atención Requerida'}
+                            </p>
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-slate-400">Báscula #01 (Norte)</span>
-                                    <span className="text-green-400 font-bold flex items-center gap-1">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-green-400" /> ONLINE
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-slate-400">Báscula #02 (Sur)</span>
-                                    <span className="text-green-400 font-bold flex items-center gap-1">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-green-400" /> ONLINE
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-slate-400">OCR Camera A1</span>
-                                    <span className="text-amber-400 font-bold flex items-center gap-1">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> CALIBRANDO
-                                    </span>
-                                </div>
+                                {!hardware && (
+                                    <p className="text-sm text-slate-400">No se pudo consultar el estado de los equipos.</p>
+                                )}
+                                {hardware && [
+                                    ...hardware.basculas.map(b => ({ key: `b${b.id_Bascula}`, nombre: b.descripcion, estado: b.estado })),
+                                    ...hardware.dispositivos.map(d => ({ key: `d${d.id_DispositivoDetector}`, nombre: d.descripcion, estado: d.estado })),
+                                ].map(eq => {
+                                    const ok = eq.estado === 'ONLINE';
+                                    return (
+                                        <div key={eq.key} className="flex justify-between items-center text-sm">
+                                            <span className="text-slate-400">{eq.nombre}</span>
+                                            <span className={`${ok ? 'text-green-400' : 'text-amber-400'} font-bold flex items-center gap-1`}>
+                                                <div className={`w-1.5 h-1.5 rounded-full ${ok ? 'bg-green-400' : 'bg-amber-400 animate-pulse'}`} /> {ok ? 'ONLINE' : eq.estado.replace('_', ' ')}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                                {hardware && (
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest pt-1">Modo {hardware.modo}</p>
+                                )}
                             </div>
                         </div>
                         <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-blue-600/20 rounded-full blur-3xl" />

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Scale, CheckCircle2, Loader2, AlertCircle,
     Clock, Truck, Plus, Search, Eye, X, Save,
-    Printer, FileText, Check, AlertTriangle
+    Printer, FileText, Check, AlertTriangle, Camera
 } from 'lucide-react';
 import agent, { getErrorMessage } from '../../api/agent';
 
@@ -164,6 +164,7 @@ const RegistrarPesadaModal = ({ isOpen, onClose, onSuccess, initialPlanId }) => 
     });
     const [loading, setLoading] = useState(false);
     const [loadingOpts, setLoadingOpts] = useState(true);
+    const [leyendo, setLeyendo] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -192,6 +193,23 @@ const RegistrarPesadaModal = ({ isOpen, onClose, onSuccess, initialPlanId }) => 
     const handleChange = e => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    };
+
+    // Lee el peso desde la báscula (Device Connector). La pesada queda como automática, no manual.
+    const handleLeerBascula = async () => {
+        if (!formData.Id_Planificacion) {
+            alert('Seleccione primero la Orden de Transporte.');
+            return;
+        }
+        setLeyendo(true);
+        try {
+            const lectura = await agent.Hardware.leerPeso(formData.Id_Bascula, formData.Id_Planificacion);
+            setFormData(prev => ({ ...prev, Cantidad: String(lectura.pesoKg), EsIngresoManual: false, MotivoIngresoManual: '' }));
+        } catch (err) {
+            alert(getErrorMessage(err, 'No se pudo leer la báscula. Puede usar el ingreso manual.'));
+        } finally {
+            setLeyendo(false);
+        }
     };
 
     const handleSubmit = async e => {
@@ -279,7 +297,18 @@ const RegistrarPesadaModal = ({ isOpen, onClose, onSuccess, initialPlanId }) => 
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Peso (kg)</label>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-sm font-semibold text-slate-700">Peso (kg)</label>
+                                <button
+                                    type="button"
+                                    onClick={handleLeerBascula}
+                                    disabled={leyendo || formData.EsIngresoManual}
+                                    className="text-xs font-bold text-blue-600 hover:text-blue-800 disabled:opacity-40 flex items-center gap-1"
+                                >
+                                    {leyendo ? <Loader2 size={12} className="animate-spin" /> : <Scale size={12} />}
+                                    Leer de báscula
+                                </button>
+                            </div>
                             <input
                                 type="number"
                                 name="Cantidad"
@@ -448,6 +477,26 @@ const PesadasPage = () => {
         }
     };
 
+    // La cámara OCR detecta un camión y se busca su orden, igual que con la búsqueda por patente.
+    const handleDetectarCamara = async () => {
+        setSearchingPatente(true);
+        setSearchPatenteError('');
+        setOtFound(null);
+        try {
+            const estado = await agent.Hardware.estado();
+            const camara = estado.dispositivos?.find(d => d.estado === 'ONLINE');
+            if (!camara) throw new Error('Sin cámara operativa');
+            const deteccion = await agent.Hardware.detectarPatente(camara.id_DispositivoDetector);
+            setPatenteSearch(deteccion.patente);
+            const ot = await agent.OrdenesTransporte.byPatente(deteccion.patente);
+            setOtFound(ot);
+        } catch (err) {
+            setSearchPatenteError(getErrorMessage(err, 'No se pudo detectar un vehículo con la cámara.'));
+        } finally {
+            setSearchingPatente(false);
+        }
+    };
+
     const handleAbrirPesadaParaOT = (ot) => {
         const plan = planificaciones.find(p => p.id_OrdenTransporte === ot.id_OrdenTransporte);
         if (plan) {
@@ -551,6 +600,15 @@ const PesadasPage = () => {
                     >
                         {searchingPatente ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                         Buscar por Patente
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleDetectarCamara}
+                        disabled={searchingPatente}
+                        className="bg-white text-slate-700 border border-slate-200 px-5 py-2 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                        <Camera size={16} />
+                        Detectar con cámara
                     </button>
                 </form>
 
