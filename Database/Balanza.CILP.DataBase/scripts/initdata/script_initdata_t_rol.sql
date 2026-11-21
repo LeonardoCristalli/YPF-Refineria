@@ -27,7 +27,5 @@ WHEN MATCHED THEN
 WHEN NOT MATCHED BY TARGET THEN
 	INSERT (id_rol, descripcion_rol, activo_rol)
 	VALUES (ii.id_rol, ii.descripcion_rol, ii.activo_rol)
-WHEN NOT MATCHED BY SOURCE THEN
-	DELETE
 ;SET IDENTITY_INSERT dbo.t_rol OFF
 GO
