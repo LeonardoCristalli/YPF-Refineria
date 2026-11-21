@@ -47,7 +47,7 @@ namespace Backend.Models
         [Key]
         public int Id_DispositivoDetector { get; set; }
 
-        [Column("Descripcion_DispositivoDetector"), MaxLength(30), Required]
+        [Column("Descripcion_DispositivoDetector"), MaxLength(50), Required]
         public string Descripcion { get; set; } = "";
 
         [Column("IP_DispositivoDetector"), MaxLength(19), Required]

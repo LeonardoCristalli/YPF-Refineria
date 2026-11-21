@@ -65,9 +65,9 @@ namespace Backend.Controllers
             dispositivo.Descripcion = (dispositivo.Descripcion ?? "").Trim();
             dispositivo.IP = (dispositivo.IP ?? "").Trim();
 
-            // La columna admite 30 caracteres.
-            if (dispositivo.Descripcion.Length < 2 || dispositivo.Descripcion.Length > 30)
-                return "La descripción es obligatoria y debe tener entre 2 y 30 caracteres.";
+            // La columna admite 50 caracteres (según la especificación).
+            if (dispositivo.Descripcion.Length < 2 || dispositivo.Descripcion.Length > 50)
+                return "La descripción es obligatoria y debe tener entre 2 y 50 caracteres.";
 
             // RN01: la IP es obligatoria, con formato IPv4 estándar
             if (!FormatoIPv4.IsMatch(dispositivo.IP))

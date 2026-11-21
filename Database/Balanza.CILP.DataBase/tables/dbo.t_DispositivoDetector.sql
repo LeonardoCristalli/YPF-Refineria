@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[t_DispositivoDetector] (
      [Id_DispositivoDetector]           INT IDENTITY(1,1)       NOT NULL
-    ,[Descripcion_DispositivoDetector]  VARCHAR(30)             NOT NULL
+    ,[Descripcion_DispositivoDetector]  VARCHAR(50)             NOT NULL
     ,[IP_DispositivoDetector]           VARCHAR(19)             NOT NULL
 	,[Activo_DispositivoDetector]	    BIT						DEFAULT(1) NOT NULL
 	,[Audit_Insert_Date]			    DATETIME				DEFAULT(GETDATE()) NOT	NULL
