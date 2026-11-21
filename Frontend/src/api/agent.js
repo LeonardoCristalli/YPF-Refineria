@@ -32,6 +32,13 @@ const Tanques = createCrud('/Tanques');
 const DispositivosDetectores = createCrud('/DispositivosDetectores');
 const Puestos = createCrud('/Puestos');
 const PuntosMenu = createCrud('/PuntosMenu');
+const Roles = createCrud('/Roles');
+const Hardware = {
+    estado: () => requests.get('/Hardware/estado'),
+    leerPeso: (idBascula, idPlanificacion, desvioPorc = 0) =>
+        requests.get(`/Hardware/basculas/${idBascula}/peso?idPlanificacion=${idPlanificacion}&desvioPorc=${desvioPorc}`),
+    detectarPatente: (idDispositivo) => requests.post(`/Hardware/dispositivos/${idDispositivo}/detectar`),
+};
 const OrdenesTransporte = {
     ...createCrud('/OrdenesTransporte'),
     cancelar: (id, motivo) => requests.patch(`/OrdenesTransporte/${id}/cancelar`, { motivo }),
@@ -81,6 +88,8 @@ export default {
     DispositivosDetectores,
     Puestos,
     PuntosMenu,
+    Roles,
+    Hardware,
     OrdenesTransporte,
     Planificaciones,
     Ordenes,

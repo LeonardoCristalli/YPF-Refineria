@@ -4,7 +4,7 @@ import {
     Truck, Scale, LayoutDashboard, Users, Package,
     Briefcase, UserCheck, Monitor, Bell, Search,
     Settings, LogOut, ChevronRight, FileText, BarChart2, Database,
-    Camera, MapPin, ListChecks
+    Camera, MapPin, ListChecks, Shield
 } from 'lucide-react';
 
 const MainLayout = () => {
@@ -31,6 +31,7 @@ const MainLayout = () => {
                 { path: "/puestos", label: "Puestos de Expedición", icon: <MapPin size={20} /> },
                 { path: "/dispositivos", label: "Dispositivos de Detección", icon: <Camera size={20} /> },
                 { path: "/puntos-menu", label: "Puntos de Menú", icon: <ListChecks size={20} /> },
+                { path: "/roles", label: "Roles y Permisos", icon: <Shield size={20} /> },
                 { path: "/usuarios", label: "Usuarios", icon: <UserCheck size={20} /> },
             ]
         }

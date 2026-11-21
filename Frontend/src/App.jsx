@@ -14,6 +14,7 @@ import TanquesPage from './features/masters/TanquesPage';
 import DispositivosPage from './features/masters/DispositivosPage';
 import PuestosPage from './features/masters/PuestosPage';
 import PuntosMenuPage from './features/masters/PuntosMenuPage';
+import RolesPage from './features/masters/RolesPage';
 import AutorizacionesPage from './features/planificacion/AutorizacionesPage';
 import ReportesPage from './features/reportes/ReportesPage';
 
@@ -39,6 +40,7 @@ function App() {
         <Route path="puestos" element={<PuestosPage />} />
         <Route path="dispositivos" element={<DispositivosPage />} />
         <Route path="puntos-menu" element={<PuntosMenuPage />} />
+        <Route path="roles" element={<RolesPage />} />
         <Route path="usuarios" element={<UsuariosPage />} />
       </Route>
     </Routes>
